@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './customer_map.dart';
 
 void main() => runApp(MyApp());
 
@@ -17,9 +18,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Text('Body'),
-      ),
+      body: CustomerMap(),
       bottomNavigationBar: Builder(builder: (BuildContext context) {
         return BottomAppBar(
           color: Colors.orange,
