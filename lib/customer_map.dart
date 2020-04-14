@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:typed_data';
+// import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,12 +23,13 @@ class _CustomerMap extends State<CustomerMap> {
     zoom: 14.4746
   );
 
-  Future<Uint8List> getMarker() async {
-    ByteData byteData = await DefaultAssetBundle.of(context).load("assets/me-marker.png");
-    return byteData.buffer.asUint8List();
-  }
+  // Future<Uint8List> getMarker() async {
+  //   ByteData byteData = await DefaultAssetBundle.of(context).load("assets/me-marker.png");
+  //   return byteData.buffer.asUint8List();
+  // }
 
-  void updateMarkerAndCircle(LocationData newLocaldata, Uint8List imageData){
+  // void updateMarkerAndCircle(LocationData newLocaldata, Uint8List imageData){
+    void updateMarkerAndCircle(LocationData newLocaldata){
     LatLng latlng = LatLng(newLocaldata.latitude, newLocaldata.longitude);
     this.setState(() {
       meMarker = Marker(
@@ -36,7 +37,8 @@ class _CustomerMap extends State<CustomerMap> {
         position: latlng,
         draggable: false,
         zIndex: 2,
-        icon: BitmapDescriptor.fromBytes(imageData) 
+        icon: BitmapDescriptor.defaultMarker
+        // icon: BitmapDescriptor.fromBytes(imageData) 
       );
       meCircle = Circle(
         circleId: CircleId("cusCir"),
@@ -52,9 +54,10 @@ class _CustomerMap extends State<CustomerMap> {
 
   void getCurrentLocation() async {
     try{
-        Uint8List imageData = await getMarker();
+        // Uint8List imageData = await getMarker();
         var location = await _locationTracker.getLocation();
-        updateMarkerAndCircle(location, imageData);
+        // updateMarkerAndCircle(location, imageData);
+        updateMarkerAndCircle(location);
         
         if(_locationSubscription != null){
           _locationSubscription.cancel();
@@ -67,7 +70,7 @@ class _CustomerMap extends State<CustomerMap> {
               target: LatLng(newLocalData.latitude, newLocalData.longitude),
               tilt: 0,
               zoom: 17.00)));
-            updateMarkerAndCircle(newLocalData, imageData);
+            updateMarkerAndCircle(newLocalData);
           }
         });
     } on PlatformException catch(e){

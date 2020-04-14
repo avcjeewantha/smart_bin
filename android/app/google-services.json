@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "891790643506",
+    "firebase_url": "https://smart-bin-273112.firebaseio.com",
+    "project_id": "smart-bin-273112",
+    "storage_bucket": "smart-bin-273112.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:891790643506:android:b804ecb3afa8aabf6a872b",
+        "android_client_info": {
+          "package_name": "com.example.smart_bin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "891790643506-859ph4qlkg31lp4efv0kg7sq41bg78nm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAr-z5kB7QOAw8lax_Y6fVtBhhSLNVJTZ4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "891790643506-859ph4qlkg31lp4efv0kg7sq41bg78nm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
