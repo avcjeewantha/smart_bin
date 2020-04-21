@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -12,11 +13,20 @@ class CustomerMap extends StatefulWidget {
 }
 
 class _CustomerMap extends State<CustomerMap> {
+  Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
+  MarkerId markerId;
+  String binState;
+  BitmapDescriptor redIcon;
+  BitmapDescriptor greenIcon;
+//  BitmapDescriptor redIcon=BitmapDescriptor.defaultMarkerWithHue(20);
+//  BitmapDescriptor greenIcon=BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
   GoogleMapController mapController;
   StreamSubscription _locationSubscription;
   Marker meMarker;
   Circle meCircle;
   Location _locationTracker = Location();
+
+
 
   static final CameraPosition initialLocation = CameraPosition(
     target: LatLng(9.6615, 80.0255),
@@ -32,7 +42,7 @@ class _CustomerMap extends State<CustomerMap> {
     void updateMarkerAndCircle(LocationData newLocaldata){
     LatLng latlng = LatLng(newLocaldata.latitude, newLocaldata.longitude);
     this.setState(() {
-      meMarker = Marker(
+      markers[MarkerId("home")]= Marker(
         markerId: MarkerId("home"),
         position: latlng,
         draggable: false,
@@ -90,9 +100,55 @@ class _CustomerMap extends State<CustomerMap> {
 
   @override
   void initState() {
-    getCurrentLocation();
+
     super.initState();
+    getCurrentLocation();
+    CollectionReference reference = Firestore.instance.collection('Bin');
+    reference.snapshots().listen((querySnapshot) {
+      querySnapshot.documentChanges.forEach((change) {
+        markerChanger(change);
+
+
+      });
+    });
+    BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(size: Size(1, 1)), 'assets/images/redbin.png')
+        .then((onValue) {
+      redIcon = onValue;
+    });
+
+    BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(size: Size(1, 1)), 'assets/images/greenbin.png')
+        .then((onValue) {
+      greenIcon = onValue;
+    });
+
+
   }
+  markerChanger(DocumentChange change){
+
+    binState=change.document['state'];
+    markerId=MarkerId(change.document.documentID);
+    print(markerId);
+    print(binState);
+    print(change.document['latitude']);
+    print(change.document['longitude']);
+    markers[markerId]=Marker(
+      // This marker id can be anything that uniquely identifies each marker.
+      markerId: markerId,
+      position: LatLng(double.parse(change.document['latitude']),double.parse(change.document['longitude'])),
+      infoWindow: InfoWindow(
+        title: 'Dustbin',
+        snippet: binState=='empty'?'Empty':'Full',
+      ),
+      icon: binState=='empty'?greenIcon:redIcon,
+      anchor: Offset(0.5,0.5),
+
+    );
+   // print(markers);
+
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +157,7 @@ class _CustomerMap extends State<CustomerMap> {
         body: GoogleMap(
           mapType: MapType.hybrid,
           initialCameraPosition: initialLocation,
-          markers: Set.of((meMarker != null) ? [meMarker] : []),
+          markers: Set<Marker>.of(markers.values),
           circles: Set.of((meCircle != null) ? [meCircle] : []),
           onMapCreated: (GoogleMapController controller) {
             mapController = controller;
