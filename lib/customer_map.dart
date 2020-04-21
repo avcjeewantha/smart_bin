@@ -129,10 +129,10 @@ class _CustomerMap extends State<CustomerMap> {
 
     binState=change.document['state'];
     markerId=MarkerId(change.document.documentID);
-    print(markerId);
-    print(binState);
-    print(change.document['latitude']);
-    print(change.document['longitude']);
+//    print(markerId);
+//    print(binState);
+//    print(change.document['latitude']);
+//    print(change.document['longitude']);
     markers[markerId]=Marker(
       // This marker id can be anything that uniquely identifies each marker.
       markerId: markerId,
