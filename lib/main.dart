@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:smart_bin/driver_map.dart';
+import 'package:smart_bin/login.dart';
+import 'package:smart_bin/my_drawer.dart';
 import './customer_map.dart';
 
 void main() => runApp(MyApp());
@@ -10,6 +13,10 @@ class MyApp extends StatelessWidget {
       theme: new ThemeData(primarySwatch: Colors.amber),
       title: 'Flutter Playground',
       home: HomePage(),
+      routes: <String, WidgetBuilder>{
+        "/login": (BuildContext context) => new Login(),
+        "/driver_map": (BuildContext context) => new DriverMap(),
+      },
     );
   }
 }
@@ -34,39 +41,7 @@ class HomePage extends StatelessWidget {
           ),
         );
         },),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero, // Important: Remove any padding from the ListView.
-          children: <Widget>[
-            new UserAccountsDrawerHeader(
-              accountName: new Text("Chamoda Jeewantha"),
-              accountEmail: new Text("avcjeewantha@gmail.com"),
-              currentAccountPicture: new CircleAvatar(
-                backgroundColor: Colors.grey,
-                child: new Text('AV'),
-              ),
-            ),
-            ListTile(
-              title: Text('Item 1'),
-              onTap: () {
-                // Update the state of the app
-                // ...
-                // Then close the drawer
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: Text('Item 2'),
-              onTap: () {
-                // Update the state of the app
-                // ...
-                // Then close the drawer
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
-      ),
+      drawer: MyDrawer(),
     );
   }
 }
