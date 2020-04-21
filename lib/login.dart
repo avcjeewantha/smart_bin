@@ -7,8 +7,8 @@ class Login extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: PhoneAuthGetPhone(),
       debugShowCheckedModeBanner: false,
+      home: PhoneAuthGetPhone(),
     );
   }
 }

@@ -5,7 +5,9 @@ class MyDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: ListView(
+      child: Container(
+        color: Colors.orange,
+        child:ListView(
           padding: EdgeInsets.zero, // Important: Remove any padding from the ListView.
           children: <Widget>[
             new UserAccountsDrawerHeader(
@@ -34,6 +36,7 @@ class MyDrawer extends StatelessWidget {
             new Divider(),
           ],
         ),
+      ),
       );    
   }
 }

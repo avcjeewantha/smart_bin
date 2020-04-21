@@ -28,7 +28,7 @@ class PhoneAuthGetPhone extends StatefulWidget {
    *  cardBackgroundColor & logo values will be passed to the constructor
    *  here we access these params in the _PhoneAuthState using "widget"
    */
-  Color cardBackgroundColor = Color(0xFF6874C2);
+  Color cardBackgroundColor = Colors.orange;
   String appName = "Awesome app";
 
   @override
@@ -57,6 +57,7 @@ class _PhoneAuthGetPhoneState extends State<PhoneAuthGetPhone> {
    */
   TextEditingController _searchCountryController = TextEditingController();
   TextEditingController _phoneNumberController = TextEditingController();
+  TextEditingController _oTpController = TextEditingController();
 
   /*
    *  This will be the index, we will modify each time the user selects a new country from the dropdown list(dialog),
@@ -70,7 +71,7 @@ class _PhoneAuthGetPhoneState extends State<PhoneAuthGetPhone> {
   static StreamController<PhoneAuthState> phoneAuthState = StreamController.broadcast();
   // static Stream stateStream = phoneAuthState.stream;
   // static BuildContext cont;
-  String phone, verificationId, smsCode;
+  String verificationId;
   bool codeSent = false;
 
   @override
@@ -83,13 +84,11 @@ class _PhoneAuthGetPhoneState extends State<PhoneAuthGetPhone> {
     // While disposing the widget, we should close all the streams and controllers
 
     // Disposing Stream components
-   _countriesSink.close();
-   _countriesStreamController.close();
+//    _countriesSink.close();
+//    _countriesStreamController.close();
 
     // Disposing _countriesSearchController
     _searchCountryController.dispose();
-    statusStream.close();
-    phoneAuthState.close();
     super.dispose();
   }
 
@@ -132,7 +131,7 @@ class _PhoneAuthGetPhoneState extends State<PhoneAuthGetPhone> {
      *  SingleChildScrollView: There can be chances arising where
      */
     return Scaffold(
-      backgroundColor: Colors.white.withOpacity(0.95),
+      backgroundColor: Colors.black,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -175,7 +174,7 @@ class _PhoneAuthGetPhoneState extends State<PhoneAuthGetPhone> {
           Text(widget.appName,
               textAlign: TextAlign.center,
               style: TextStyle(
-                  color: Colors.white,
+                  color: Colors.black,
                   fontSize: 24.0,
                   fontWeight: FontWeight.w700)),
 
@@ -210,6 +209,19 @@ class _PhoneAuthGetPhoneState extends State<PhoneAuthGetPhone> {
                 countries[_selectedCountryIndex].dialCode),
           ),
 
+          codeSent ? Padding(
+            padding: EdgeInsets.only(top: 10.0, left: _fixedPadding),
+            child: PhoneAuthWidgets.subTitle('Enter OTP'),
+          ):Container(),
+          //  PhoneNumber TextFormFields
+          codeSent ? Padding(
+            padding: EdgeInsets.only(
+                left: _fixedPadding,
+                right: _fixedPadding,
+                bottom: _fixedPadding),
+            child: PhoneAuthWidgets.oTPField(_oTpController),
+          ):Container(),
+
           /*
            *  Some informative text
            */
@@ -217,25 +229,25 @@ class _PhoneAuthGetPhoneState extends State<PhoneAuthGetPhone> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               SizedBox(width: _fixedPadding),
-              Icon(Icons.info, color: Colors.white, size: 20.0),
+              codeSent ? Container():Icon(Icons.info, color: Colors.black, size: 20.0),
               SizedBox(width: 10.0),
               Expanded(
-                child: RichText(
+                child: codeSent ? Container() :RichText(
                     text: TextSpan(children: [
                   TextSpan(
                       text: 'We will send ',
                       style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.w400)),
+                          color: Colors.black, fontWeight: FontWeight.w400)),
                   TextSpan(
                       text: 'One Time Password',
                       style: TextStyle(
-                          color: Colors.white,
+                          color: Colors.black,
                           fontSize: 16.0,
                           fontWeight: FontWeight.w700)),
                   TextSpan(
                       text: ' to this mobile number',
                       style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.w400)),
+                          color: Colors.black, fontWeight: FontWeight.w400)),
                 ])),
               ),
               SizedBox(width: _fixedPadding),
@@ -248,15 +260,33 @@ class _PhoneAuthGetPhoneState extends State<PhoneAuthGetPhone> {
            *  where is asked to enter the OTP he has received on his mobile (or) wait for the system to automatically detect the OTP
            */
           SizedBox(height: _fixedPadding * 1.5),
-          RaisedButton(
+          codeSent ? RaisedButton(
             elevation: 16.0,
-            onPressed: verifyPhone,
+            onPressed: () {
+                AuthService().signInWithOTP(_oTpController.text, verificationId);
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Verify',
+                style: TextStyle(
+                    color: Colors.black, fontSize: 18.0),
+              ),
+            ),
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30.0)),
+          ) :RaisedButton(
+            elevation: 16.0,
+            onPressed: () {
+                verifyPhone(countries[_selectedCountryIndex].dialCode + _phoneNumberController.text);
+            },
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
                 'SEND OTP',
                 style: TextStyle(
-                    color: widget.cardBackgroundColor, fontSize: 18.0),
+                    color: Colors.black, fontSize: 18.0),
               ),
             ),
             color: Colors.white,
@@ -341,7 +371,7 @@ class _PhoneAuthGetPhoneState extends State<PhoneAuthGetPhone> {
 
                 //  Returns a list of Countries that will change according to the search query
                 SizedBox(
-                  height: 300.0,
+                  height: 175.0,
                   child: StreamBuilder<List<Country>>(
                       //key: Key('Countries-StreamBuilder'),
                       stream: _countriesStream,
@@ -382,18 +412,20 @@ class _PhoneAuthGetPhoneState extends State<PhoneAuthGetPhone> {
   void selectThisCountry(Country country) {
     print(country);
     _searchCountryController.clear();
-    Navigator.of(context).pop();
+    Navigator.of(context, rootNavigator: true).pop();
     Future.delayed(Duration(milliseconds: 10)).whenComplete(() {
       _countriesStreamController.close();
       _countriesSink.close();
+      
       setState(() {
         _selectedCountryIndex = countries.indexOf(country);
       });
     });
   }
 
-  Future<void> verifyPhone() async {
-
+  Future<void> verifyPhone(phoneNo) async {
+    print("Hi there Im chamodaa............................");
+    print(phoneNo);
     final PhoneVerificationCompleted verified =(AuthCredential authResult){
       AuthService().signIn(authResult);
     };
@@ -412,6 +444,7 @@ class _PhoneAuthGetPhoneState extends State<PhoneAuthGetPhone> {
 
     final PhoneCodeSent smsSent = (String verId, [int forceResend]) {
       verificationId = verId;
+      print('chamoda: code sent');
       setState((){
         this.codeSent = true;
       });
@@ -426,7 +459,7 @@ class _PhoneAuthGetPhoneState extends State<PhoneAuthGetPhone> {
     };
 
     await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: phone, 
+      phoneNumber: phoneNo, 
       timeout: const Duration(seconds:60), 
       verificationCompleted: verified, 
       verificationFailed: verificationFailed, 

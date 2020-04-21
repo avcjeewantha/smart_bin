@@ -35,6 +35,21 @@ class PhoneAuthWidgets {
         ),
       );
 
+  static Widget oTPField(
+          TextEditingController controller) =>
+      Card(
+        child: TextFormField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          key: Key('EnterOTP-TextFormField'),
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            errorMaxLines: 1,
+          ),
+        ),
+      );
+
   static Widget selectableWidget(Country country, Function(Country) selectThisCountry) =>
       Material(
         color: Colors.white,
@@ -81,5 +96,5 @@ class PhoneAuthWidgets {
   static Widget subTitle(String text) => Align(
       alignment: Alignment.centerLeft,
       child: Text(' $text',
-          style: TextStyle(color: Colors.white, fontSize: 14.0)));
+          style: TextStyle(color: Colors.black, fontSize: 14.0)));
 }
