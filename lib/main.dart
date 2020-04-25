@@ -1,3 +1,4 @@
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -29,13 +30,14 @@ class HomePage extends StatelessWidget {
   TextEditingController complain = new TextEditingController();
   Firestore _firestore = Firestore.instance;
   String snackbarMessage;
-
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key:_scaffoldKey,
       resizeToAvoidBottomInset:false,
       resizeToAvoidBottomPadding:false,
-      body: CustomerMap(),
+    body: CustomerMap(),
       bottomNavigationBar: MediaQuery.of(context).viewInsets.bottom !=0 ? null :
         BottomAppBar(
           color: Colors.orange,
@@ -44,13 +46,17 @@ class HomePage extends StatelessWidget {
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
               IconButton(icon: Icon(Icons.menu), onPressed: () {
-                Scaffold.of(context).openDrawer();
+
+                    _scaffoldKey.currentState.openDrawer();
+
               }),
               IconButton(icon: Icon(Icons.message), onPressed:() async{
+                complain.clear();
                await _showDialog(context);
                if(snackbarMessage!=null){
 //                 print("snackbarMessage not null");
 //                 print(snackbarMessage);
+
                ShowFlushbar.showMessage(snackbarMessage, context);
                }
              }
@@ -132,7 +138,8 @@ class HomePage extends StatelessWidget {
                         Navigator.pop(context, true);
 
                      },
-
+                      disabledColor:Colors.grey,
+  //                     enabled:complain.text.isEmpty,
                          child: Text('SEND'),
                        color: Colors.orange,
                        textColor: Colors.white,

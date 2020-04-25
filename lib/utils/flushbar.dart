@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 
 class ShowFlushbar{
 
-  static void showMessage(message,context) {
-    Flushbar(
+  static Widget showMessage(message,context) {
+   return Flushbar(
       // title: 'This action is prohibited',
       message: message,
       icon: Icon(
