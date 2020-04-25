@@ -104,7 +104,6 @@ class HomePage extends StatelessWidget {
                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                    children: <Widget>[
                      new FlatButton(onPressed: (){
-                       complain.clear();
                        snackbarMessage=null;
                        Navigator.pop(context, true);
                      },
@@ -115,29 +114,28 @@ class HomePage extends StatelessWidget {
              ),
 
                      new FlatButton(onPressed: () async{
-                        print(complain.text);
-                      await _firestore.collection('complain').add({
-                         'complain': complain.text
-                       }).then((documentReference){
-                         complain.clear();
-                         print(documentReference.documentID);
-                         snackbarMessage='Successful! Complain was sent';
+                       if(complain.text.trim().isNotEmpty) {
+                         await _firestore.collection('complain').add({
+                           'complain': complain.text
+                         }).then((documentReference) {
+                           print(documentReference.documentID);
+                           snackbarMessage = 'Successful! Complain was sent';
 //                         ShowFlushbar.showMessage(
 //                             'Successful! Complain was sent', context);
 
-                       }
-                       ).catchError((onError){
-                         print(onError);
-                         complain.clear();
-                         snackbarMessage='Something is wrong ';
+                         }
+                         ).catchError((onError) {
+                           print(onError);
+                           snackbarMessage = 'Something is wrong ';
 //                         ShowFlushbar.showMessage('Something is wrong ', context);
 
 
+                         }
+                         );
+                         Navigator.pop(context, true);
                        }
-                       );
-                        Navigator.pop(context, true);
-
-                     },
+                       ShowFlushbar.showMessage('Please enter valid complain ', context);
+                       },
                       disabledColor:Colors.grey,
   //                     enabled:complain.text.isEmpty,
                          child: Text('SEND'),
