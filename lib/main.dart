@@ -28,6 +28,7 @@ class MyApp extends StatelessWidget {
 class HomePage extends StatelessWidget {
   TextEditingController complain = new TextEditingController();
   Firestore _firestore = Firestore.instance;
+  String snackbarMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -45,8 +46,13 @@ class HomePage extends StatelessWidget {
               IconButton(icon: Icon(Icons.menu), onPressed: () {
                 Scaffold.of(context).openDrawer();
               }),
-              IconButton(icon: Icon(Icons.message), onPressed:(){
-                _showDialog(context);
+              IconButton(icon: Icon(Icons.message), onPressed:() async{
+               await _showDialog(context);
+               if(snackbarMessage!=null){
+//                 print("snackbarMessage not null");
+//                 print(snackbarMessage);
+               ShowFlushbar.showMessage(snackbarMessage, context);
+               }
              }
 
               ),
@@ -93,6 +99,7 @@ class HomePage extends StatelessWidget {
                    children: <Widget>[
                      new FlatButton(onPressed: (){
                        complain.clear();
+                       snackbarMessage=null;
                        Navigator.pop(context, true);
                      },
 
@@ -101,22 +108,29 @@ class HomePage extends StatelessWidget {
                        textColor: Colors.white,
              ),
 
-                     new FlatButton(onPressed: (){
+                     new FlatButton(onPressed: () async{
                         print(complain.text);
-                       _firestore.collection('complain').add({
+                      await _firestore.collection('complain').add({
                          'complain': complain.text
                        }).then((documentReference){
                          complain.clear();
                          print(documentReference.documentID);
-                         ShowFlushbar.showMessage(
-                             'Successful! Complain was sent', context);
+                         snackbarMessage='Successful! Complain was sent';
+//                         ShowFlushbar.showMessage(
+//                             'Successful! Complain was sent', context);
+
                        }
                        ).catchError((onError){
                          print(onError);
                          complain.clear();
-                         ShowFlushbar.showMessage('Something is wrong ', context);
+                         snackbarMessage='Something is wrong ';
+//                         ShowFlushbar.showMessage('Something is wrong ', context);
+
+
                        }
                        );
+                        Navigator.pop(context, true);
+
                      },
 
                          child: Text('SEND'),
