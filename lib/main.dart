@@ -36,29 +36,33 @@ class HomePage extends StatelessWidget {
       resizeToAvoidBottomInset:false,
       resizeToAvoidBottomPadding:false,
       body: CustomerMap(),
-      bottomNavigationBar: MediaQuery.of(context).viewInsets.bottom !=0 ? null :
-        BottomAppBar(
-          color: Colors.orange,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-              IconButton(icon: Icon(Icons.menu), onPressed: () {
-                Scaffold.of(context).openDrawer();
-              }),
-              IconButton(icon: Icon(Icons.message), onPressed:() async{
-               await _showDialog(context);
-               if(snackbarMessage!=null){
-//                 print("snackbarMessage not null");
-//                 print(snackbarMessage);
-               ShowFlushbar.showMessage(snackbarMessage, context);
-               }
-             }
+      bottomNavigationBar: Builder(builder: (BuildContext context){
+        return MediaQuery.of(context).viewInsets.bottom !=0 ? null :
+                BottomAppBar(
+                  color: Colors.orange,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      IconButton(icon: Icon(Icons.menu), onPressed: () {
+                        Scaffold.of(context).openDrawer();
+                      }),
+                      IconButton(icon: Icon(Icons.message), onPressed:() async{
+                      await _showDialog(context);
+                      if(snackbarMessage!=null){
+        //                 print("snackbarMessage not null");
+        //                 print(snackbarMessage);
+                       ShowFlushbar.showMessage(snackbarMessage, context);
+                      }
+                    }
 
-              ),
-            ],
-          ),
-        ),
+                      ),
+                    ],
+                  ),
+                );
+      }),
+      
+      
 
       drawer: MyDrawer(),
     );
