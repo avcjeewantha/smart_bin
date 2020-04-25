@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:smart_bin/data_models/countries.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:smart_bin/authservices.dart';
+import 'package:smart_bin/driver_map.dart';
 import 'package:smart_bin/utils/widgets.dart';
 
 /*
@@ -428,6 +429,19 @@ class _PhoneAuthGetPhoneState extends State<PhoneAuthGetPhone> {
     print(phoneNo);
     final PhoneVerificationCompleted verified =(AuthCredential authResult){
       AuthService().signIn(authResult);
+      FirebaseAuth.instance.currentUser().then((user) {
+        if(user !=null) {
+          Navigator.of(context).pop();
+          print('there is a use chamoda.................');
+          // Navigator.of(context).pushReplacementNamed('/driver_map');
+          Navigator.push(context, new MaterialPageRoute(
+            builder: (context) =>
+              new DriverMap())
+            );
+        }else{
+          Navigator.of(context).pop();
+        }
+      });
     };
 
     final PhoneVerificationFailed verificationFailed = (AuthException authException){
