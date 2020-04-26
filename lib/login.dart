@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:smart_bin/firebase/auth/phone_auth/get_phone.dart';
-import 'test_screen.dart';
+import 'package:smart_bin/test_screen.dart';
 
 class Login extends StatelessWidget {
   @override

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_bin/authservices.dart';
 
 class MyDrawer extends StatelessWidget {
   
@@ -21,8 +22,15 @@ class MyDrawer extends StatelessWidget {
             ListTile(
               title: Text('Truck Map'),
               onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, "/login");
+                AuthService().getCurrentUser().then((user){
+                  if(user != null){
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, "/driver_map");
+                  }else{
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, "/login");
+                }});
+                
               },
             ),
             new Divider(),

@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:smart_bin/data_models/countries.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:smart_bin/authservices.dart';
-import 'package:smart_bin/driver_map.dart';
+import 'package:smart_bin/utils/flushbar.dart';
 import 'package:smart_bin/utils/widgets.dart';
 
 /*
@@ -23,6 +23,7 @@ enum PhoneAuthState {
   Error,
   AutoRetrievalTimeOut
 }
+
 // ignore: must_be_immutable
 class PhoneAuthGetPhone extends StatefulWidget {
   /*
@@ -30,7 +31,7 @@ class PhoneAuthGetPhone extends StatefulWidget {
    *  here we access these params in the _PhoneAuthState using "widget"
    */
   Color cardBackgroundColor = Colors.orange;
-  String appName = "Awesome app";
+  String title = "Driver Login";
 
   @override
   _PhoneAuthGetPhoneState createState() => _PhoneAuthGetPhoneState();
@@ -65,13 +66,7 @@ class _PhoneAuthGetPhoneState extends State<PhoneAuthGetPhone> {
    *  As a default case, we are using India as default country, index = 31
    */
   int _selectedCountryIndex = 208;
-
   bool _isCountriesDataFormed = false;
-     // static var _authCredential, actualCode, phone, status;
-  static StreamController<String> statusStream = StreamController.broadcast();
-  static StreamController<PhoneAuthState> phoneAuthState = StreamController.broadcast();
-  // static Stream stateStream = phoneAuthState.stream;
-  // static BuildContext cont;
   String verificationId;
   bool codeSent = false;
 
@@ -171,8 +166,8 @@ class _PhoneAuthGetPhoneState extends State<PhoneAuthGetPhone> {
   Widget _getColumnBody() => Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          // AppName:
-          Text(widget.appName,
+          // title:
+          Text(widget.title,
               textAlign: TextAlign.center,
               style: TextStyle(
                   color: Colors.black,
@@ -210,18 +205,22 @@ class _PhoneAuthGetPhoneState extends State<PhoneAuthGetPhone> {
                 countries[_selectedCountryIndex].dialCode),
           ),
 
-          codeSent ? Padding(
-            padding: EdgeInsets.only(top: 10.0, left: _fixedPadding),
-            child: PhoneAuthWidgets.subTitle('Enter OTP'),
-          ):Container(),
+          codeSent
+              ? Padding(
+                  padding: EdgeInsets.only(top: 10.0, left: _fixedPadding),
+                  child: PhoneAuthWidgets.subTitle('Enter OTP'),
+                )
+              : Container(),
           //  PhoneNumber TextFormFields
-          codeSent ? Padding(
-            padding: EdgeInsets.only(
-                left: _fixedPadding,
-                right: _fixedPadding,
-                bottom: _fixedPadding),
-            child: PhoneAuthWidgets.oTPField(_oTpController),
-          ):Container(),
+          codeSent
+              ? Padding(
+                  padding: EdgeInsets.only(
+                      left: _fixedPadding,
+                      right: _fixedPadding,
+                      bottom: _fixedPadding),
+                  child: PhoneAuthWidgets.oTPField(_oTpController),
+                )
+              : Container(),
 
           /*
            *  Some informative text
@@ -230,26 +229,32 @@ class _PhoneAuthGetPhoneState extends State<PhoneAuthGetPhone> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               SizedBox(width: _fixedPadding),
-              codeSent ? Container():Icon(Icons.info, color: Colors.black, size: 20.0),
+              codeSent
+                  ? Container()
+                  : Icon(Icons.info, color: Colors.black, size: 20.0),
               SizedBox(width: 10.0),
               Expanded(
-                child: codeSent ? Container() :RichText(
-                    text: TextSpan(children: [
-                  TextSpan(
-                      text: 'We will send ',
-                      style: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.w400)),
-                  TextSpan(
-                      text: 'One Time Password',
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w700)),
-                  TextSpan(
-                      text: ' to this mobile number',
-                      style: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.w400)),
-                ])),
+                child: codeSent
+                    ? Container()
+                    : RichText(
+                        text: TextSpan(children: [
+                        TextSpan(
+                            text: 'We will send ',
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.w400)),
+                        TextSpan(
+                            text: 'One Time Password',
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.w700)),
+                        TextSpan(
+                            text: ' to this mobile number',
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.w400)),
+                      ])),
               ),
               SizedBox(width: _fixedPadding),
             ],
@@ -261,39 +266,41 @@ class _PhoneAuthGetPhoneState extends State<PhoneAuthGetPhone> {
            *  where is asked to enter the OTP he has received on his mobile (or) wait for the system to automatically detect the OTP
            */
           SizedBox(height: _fixedPadding * 1.5),
-          codeSent ? RaisedButton(
-            elevation: 16.0,
-            onPressed: () {
-                AuthService().signInWithOTP(_oTpController.text, verificationId);
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                'Verify',
-                style: TextStyle(
-                    color: Colors.black, fontSize: 18.0),
-              ),
-            ),
-            color: Colors.white,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.0)),
-          ) :RaisedButton(
-            elevation: 16.0,
-            onPressed: () {
-                verifyPhone(countries[_selectedCountryIndex].dialCode + _phoneNumberController.text);
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                'SEND OTP',
-                style: TextStyle(
-                    color: Colors.black, fontSize: 18.0),
-              ),
-            ),
-            color: Colors.white,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.0)),
-          ),
+          codeSent
+              ? RaisedButton(
+                  elevation: 16.0,
+                  onPressed: () {
+                    AuthService()
+                        .signInWithOTP(_oTpController.text, verificationId, context);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'Verify',
+                      style: TextStyle(color: Colors.black, fontSize: 18.0),
+                    ),
+                  ),
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.0)),
+                )
+              : RaisedButton(
+                  elevation: 16.0,
+                  onPressed: () {
+                    verifyPhone(countries[_selectedCountryIndex].dialCode +
+                        _phoneNumberController.text);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'SEND OTP',
+                      style: TextStyle(color: Colors.black, fontSize: 18.0),
+                    ),
+                  ),
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.0)),
+                ),
         ],
       );
 
@@ -328,8 +335,7 @@ class _PhoneAuthGetPhoneState extends State<PhoneAuthGetPhone> {
   searchCountries() {
     String query = _searchCountryController.text;
     if (query.length == 0 || query.length == 1) {
-      if(!_countriesStreamController.isClosed)
-        _countriesSink.add(countries);
+      if (!_countriesStreamController.isClosed) _countriesSink.add(countries);
 //      print('added all countries again');
     } else if (query.length >= 2 && query.length <= 5) {
       List<Country> searchResults = [];
@@ -411,13 +417,12 @@ class _PhoneAuthGetPhoneState extends State<PhoneAuthGetPhone> {
    *    Updates the selected Country and adds dialCode as prefix according to the user's selection
    */
   void selectThisCountry(Country country) {
-    print(country);
     _searchCountryController.clear();
     Navigator.of(context, rootNavigator: true).pop();
     Future.delayed(Duration(milliseconds: 10)).whenComplete(() {
       _countriesStreamController.close();
       _countriesSink.close();
-      
+
       setState(() {
         _selectedCountryIndex = countries.indexOf(country);
       });
@@ -425,71 +430,48 @@ class _PhoneAuthGetPhoneState extends State<PhoneAuthGetPhone> {
   }
 
   Future<void> verifyPhone(phoneNo) async {
-    print("Hi there Im chamodaa............................");
-    print(phoneNo);
-    final PhoneVerificationCompleted verified =(AuthCredential authResult){
-      AuthService().signIn(authResult);
-      FirebaseAuth.instance.currentUser().then((user) {
-        if(user !=null) {
-          Navigator.of(context).pop();
-          print('there is a use chamoda.................');
-          // Navigator.of(context).pushReplacementNamed('/driver_map');
-          Navigator.push(context, new MaterialPageRoute(
-            builder: (context) =>
-              new DriverMap())
-            );
-        }else{
-          Navigator.of(context).pop();
-        }
-      });
+    String snackbarMessage;
+
+    final PhoneVerificationCompleted verified = (AuthCredential authResult) {
+      AuthService().signIn(authResult, context);
     };
 
-    final PhoneVerificationFailed verificationFailed = (AuthException authException){
-      // addStatus('${authException.message}');
-      // addState(PhoneAuthState.Error);
-      // if (authException.message.contains('not authorized'))
-      //   addStatus('App not authroized');
-      // else if (authException.message.contains('Network'))
-      //   addStatus('Please check your internet connection and try again');
-      // else
-      //   addStatus('Something has gone wrong, please try later ' + authException.message);
+    final PhoneVerificationFailed verificationFailed =
+        (AuthException authException) {
+          snackbarMessage = null;
+          if (snackbarMessage != null) {
+            ShowFlushbar.showMessage(snackbarMessage, context);
+          }
+      if (authException.message.contains('not authorized'))
+        snackbarMessage = 'App not authroized';
+      else if (authException.message.contains('Network'))
+        snackbarMessage = 'Please check your internet connection and try again';
+      else
+        snackbarMessage = 'Something has gone wrong, please try later ' + authException.message;
       print("chamoda : verification Failed");
     };
 
     final PhoneCodeSent smsSent = (String verId, [int forceResend]) {
       verificationId = verId;
-      print('chamoda: code sent');
-      setState((){
+      setState(() {
         this.codeSent = true;
       });
-      // addStatus("\nEnter the code sent to " + phone);
-      // addState(PhoneAuthState.CodeSent);
     };
 
     final PhoneCodeAutoRetrievalTimeout autoTimeout = (String verId) {
       verificationId = verId;
-      // addStatus("\nAuto retrieval time out");
-      // addState(PhoneAuthState.AutoRetrievalTimeOut);
     };
 
-    await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: phoneNo, 
-      timeout: const Duration(seconds:60), 
-      verificationCompleted: verified, 
-      verificationFailed: verificationFailed, 
-      codeSent: smsSent, 
-      codeAutoRetrievalTimeout: autoTimeout).catchError((error) {
-      // addStatus(error.toString());
-      });
+    await FirebaseAuth.instance
+        .verifyPhoneNumber(
+            phoneNumber: phoneNo,
+            timeout: const Duration(seconds: 60),
+            verificationCompleted: verified,
+            verificationFailed: verificationFailed,
+            codeSent: smsSent,
+            codeAutoRetrievalTimeout: autoTimeout)
+        .catchError((error) {
+    });
   }
 
-  // static addState(PhoneAuthState state) {
-  //   print(state);
-  //   // phoneAuthState.sink.add(state);
-  // }
-
-  // static void addStatus(String s) {
-  //   // statusStream.sink.add(s);
-  //   print(s);
-  // }
 }

@@ -1,13 +1,10 @@
-import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-
+import 'package:smart_bin/customer_map.dart';
 import 'package:smart_bin/driver_map.dart';
 import 'package:smart_bin/login.dart';
 import 'package:smart_bin/my_drawer.dart';
-import './customer_map.dart';
-import './utils/flushbar.dart';
+import 'package:smart_bin/utils/flushbar.dart';
 
 void main() => runApp(MyApp());
 
@@ -26,11 +23,19 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   TextEditingController complain = new TextEditingController();
   Firestore _firestore = Firestore.instance;
+
   String snackbarMessage;
+
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -141,7 +146,7 @@ class HomePage extends StatelessWidget {
                          child: Text('SEND'),
                        color: Colors.orange,
                        textColor: Colors.white,
-                     )
+                     ),
                    ],
                  )
                ],
