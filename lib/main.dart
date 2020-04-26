@@ -39,122 +39,102 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key:_scaffoldKey,
-      resizeToAvoidBottomInset:false,
-      resizeToAvoidBottomPadding:false,
-    body: CustomerMap(),
-      bottomNavigationBar: MediaQuery.of(context).viewInsets.bottom !=0 ? null :
-        BottomAppBar(
-          color: Colors.orange,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-              IconButton(icon: Icon(Icons.menu), onPressed: () {
-
-                    _scaffoldKey.currentState.openDrawer();
-
-              }),
-              IconButton(icon: Icon(Icons.message), onPressed:() async{
-                complain.clear();
-               await _showDialog(context);
-               if(snackbarMessage!=null){
+      key: _scaffoldKey,
+      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomPadding: false,
+      body: CustomerMap(),
+      bottomNavigationBar: MediaQuery.of(context).viewInsets.bottom != 0
+          ? null
+          : BottomAppBar(
+              color: Colors.orange,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  IconButton(
+                      icon: Icon(Icons.menu),
+                      onPressed: () {
+                        _scaffoldKey.currentState.openDrawer();
+                      }),
+                  IconButton(
+                      icon: Icon(Icons.message),
+                      onPressed: () async {
+                        complain.clear();
+                        await _showDialog(context);
+                        if (snackbarMessage != null) {
 //                 print("snackbarMessage not null");
 //                 print(snackbarMessage);
 
-               ShowFlushbar.showMessage(snackbarMessage, context);
-               }
-             }
-
+                          ShowFlushbar.showMessage(snackbarMessage, context);
+                        }
+                      }),
+                ],
               ),
-            ],
-          ),
-        ),
-
+            ),
       drawer: MyDrawer(),
     );
-
-
   }
-     _showDialog(BuildContext context)  async {
+
+  _showDialog(BuildContext context) async {
 //
-       await showDialog(
-           context: context,
-           builder: (BuildContext context) {
-
-             return SimpleDialog(
-               title: Text("Enter your complain",
-               style:TextStyle(
-                 fontSize: 18,
-               )
-
-               ),
-               children: <Widget>[
-
-                 new SizedBox(
-                     width: MediaQuery.of(context).size.width,
-                     child: SingleChildScrollView(
-                     child: TextField(
-                       decoration: new InputDecoration(hintText: "Enter your complain", contentPadding: const EdgeInsets.all(20.0)),
-                       controller: complain,
-                       maxLines: null,
-                       
-                     ),
-                   ),
-             ),
-
-
-
-                 new Row(
-                   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                   children: <Widget>[
-                     new FlatButton(onPressed: (){
-                       snackbarMessage=null;
-                       Navigator.pop(context, true);
-                     },
-
-                      child: Text('CANCEL'),
-                       color: Colors.orange,
-                       textColor: Colors.white,
-             ),
-
-                     new FlatButton(onPressed: () async{
-                       if(complain.text.trim().isNotEmpty) {
-                         await _firestore.collection('complain').add({
-                           'complain': complain.text
-                         }).then((documentReference) {
-                           print(documentReference.documentID);
-                           snackbarMessage = 'Successful! Complain was sent';
-//                         ShowFlushbar.showMessage(
-//                             'Successful! Complain was sent', context);
-
-                         }
-                         ).catchError((onError) {
-                           print(onError);
-                           snackbarMessage = 'Something is wrong ';
-//                         ShowFlushbar.showMessage('Something is wrong ', context);
-
-
-                         }
-                         );
-                         Navigator.pop(context, true);
-                       }
-                       ShowFlushbar.showMessage('Please enter valid complain ', context);
-                       },
-                      disabledColor:Colors.grey,
-  //                     enabled:complain.text.isEmpty,
-                         child: Text('SEND'),
-                       color: Colors.orange,
-                       textColor: Colors.white,
-                     ),
-                   ],
-                 )
-               ],
-
-             );
-           }
-       );
-     }
-
-
+    await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return SimpleDialog(
+            title: Text("Enter your complain",
+                style: TextStyle(
+                  fontSize: 18,
+                )),
+            children: <Widget>[
+              new SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: SingleChildScrollView(
+                  child: TextField(
+                    decoration: new InputDecoration(
+                        hintText: "Enter your complain",
+                        contentPadding: const EdgeInsets.all(20.0)),
+                    controller: complain,
+                    maxLines: null,
+                  ),
+                ),
+              ),
+              new Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  new FlatButton(
+                    onPressed: () {
+                      snackbarMessage = null;
+                      Navigator.pop(context, true);
+                    },
+                    child: Text('CANCEL'),
+                    color: Colors.orange,
+                    textColor: Colors.white,
+                  ),
+                  new FlatButton(
+                    onPressed: () async {
+                      if (complain.text.trim().isNotEmpty) {
+                        await _firestore
+                            .collection('complain')
+                            .add({'complain': complain.text}).then(
+                                (documentReference) {
+                          snackbarMessage = 'Successful! Complain was sent';
+                        }).catchError((onError) {
+                          snackbarMessage = 'Something is wrong ';
+                        });
+                        Navigator.pop(context, true);
+                      }
+                      ShowFlushbar.showMessage(
+                          'Please enter valid complain ', context);
+                    },
+                    disabledColor: Colors.grey,
+                    child: Text('SEND'),
+                    color: Colors.orange,
+                    textColor: Colors.white,
+                  ),
+                ],
+              )
+            ],
+          );
+        });
+  }
 }
