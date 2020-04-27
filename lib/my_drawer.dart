@@ -1,28 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:smart_bin/authservices.dart';
 
 class MyDrawer extends StatelessWidget {
-  
   @override
   Widget build(BuildContext context) {
     return Drawer(
       child: Container(
         color: Colors.orange,
-        child:ListView(
-          padding: EdgeInsets.zero, // Important: Remove any padding from the ListView.
+        child: ListView(
+          padding: EdgeInsets
+              .zero, // Important: Remove any padding from the ListView.
           children: <Widget>[
-            new UserAccountsDrawerHeader(
-              accountName: new Text("Chamoda Jeewantha"),
-              accountEmail: new Text("avcjeewantha@gmail.com"),
-              currentAccountPicture: new CircleAvatar(
-                backgroundColor: Colors.grey,
-                child: new Text('AV'),
-              ),
+            new DrawerHeader(
+              decoration: BoxDecoration(
+                  image: DecorationImage(
+                      image: AssetImage("assets/images/drawer_header.png"),
+                      fit: BoxFit.cover)),
+              child: null,
             ),
             ListTile(
               title: Text('Truck Map'),
               onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, "/driver_map");
+
+                AuthService().getCurrentUser().then((user) {
+                  if (user != null) {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, "/driver_map");
+                  } else {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, "/login");
+                  }
+                });
               },
             ),
             new Divider(),
@@ -37,6 +45,6 @@ class MyDrawer extends StatelessWidget {
           ],
         ),
       ),
-      );    
+    );
   }
 }

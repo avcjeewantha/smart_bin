@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -18,38 +16,24 @@ class _CustomerMap extends State<CustomerMap> {
   String binState;
   BitmapDescriptor redIcon;
   BitmapDescriptor greenIcon;
-//  BitmapDescriptor redIcon=BitmapDescriptor.defaultMarkerWithHue(20);
-//  BitmapDescriptor greenIcon=BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
   GoogleMapController mapController;
   StreamSubscription _locationSubscription;
   Marker meMarker;
   Circle meCircle;
   Location _locationTracker = Location();
 
+  static final CameraPosition initialLocation =
+      CameraPosition(target: LatLng(9.6615, 80.0255), zoom: 14.4746);
 
-
-  static final CameraPosition initialLocation = CameraPosition(
-    target: LatLng(9.6615, 80.0255),
-    zoom: 14.4746
-  );
-
-  // Future<Uint8List> getMarker() async {
-  //   ByteData byteData = await DefaultAssetBundle.of(context).load("assets/me-marker.png");
-  //   return byteData.buffer.asUint8List();
-  // }
-
-  // void updateMarkerAndCircle(LocationData newLocaldata, Uint8List imageData){
-    void updateMarkerAndCircle(LocationData newLocaldata){
+  void updateMarkerAndCircle(LocationData newLocaldata) {
     LatLng latlng = LatLng(newLocaldata.latitude, newLocaldata.longitude);
     this.setState(() {
-      markers[MarkerId("home")]= Marker(
-        markerId: MarkerId("home"),
-        position: latlng,
-        draggable: false,
-        zIndex: 2,
-        icon: BitmapDescriptor.defaultMarker
-        // icon: BitmapDescriptor.fromBytes(imageData) 
-      );
+      markers[MarkerId("home")] = Marker(
+          markerId: MarkerId("home"),
+          position: latlng,
+          draggable: false,
+          zIndex: 2,
+          icon: BitmapDescriptor.defaultMarker);
       meCircle = Circle(
         circleId: CircleId("cusCir"),
         radius: newLocaldata.accuracy,
@@ -63,36 +47,36 @@ class _CustomerMap extends State<CustomerMap> {
   }
 
   void getCurrentLocation() async {
-    try{
-        // Uint8List imageData = await getMarker();
-        var location = await _locationTracker.getLocation();
-        // updateMarkerAndCircle(location, imageData);
-        updateMarkerAndCircle(location);
-        
-        if(_locationSubscription != null){
-          _locationSubscription.cancel();
-        }
+    try {
+      var location = await _locationTracker.getLocation();
+      updateMarkerAndCircle(location);
 
-        _locationSubscription = _locationTracker.onLocationChanged.listen((newLocalData){
-          if(mapController != null){
-            mapController.animateCamera(CameraUpdate.newCameraPosition(new CameraPosition(
-              bearing: 192.8334901395799,
-              target: LatLng(newLocalData.latitude, newLocalData.longitude),
-              tilt: 0,
-              zoom: 17.00)));
-            updateMarkerAndCircle(newLocalData);
-          }
-        });
-    } on PlatformException catch(e){
-      if(e.code == "PERMISSION DENIED"){
+      if (_locationSubscription != null) {
+        _locationSubscription.cancel();
+      }
+
+      _locationSubscription =
+          _locationTracker.onLocationChanged.listen((newLocalData) {
+        if (mapController != null) {
+          mapController.animateCamera(CameraUpdate.newCameraPosition(
+              new CameraPosition(
+                  bearing: 192.8334901395799,
+                  target: LatLng(newLocalData.latitude, newLocalData.longitude),
+                  tilt: 0,
+                  zoom: 17.00)));
+          updateMarkerAndCircle(newLocalData);
+        }
+      });
+    } on PlatformException catch (e) {
+      if (e.code == "PERMISSION DENIED") {
         debugPrint("Permission Denied");
       }
     }
   }
 
   @override
-  void dispose(){
-    if(_locationSubscription != null){
+  void dispose() {
+    if (_locationSubscription != null) {
       _locationSubscription.cancel();
     }
     super.dispose();
@@ -100,55 +84,43 @@ class _CustomerMap extends State<CustomerMap> {
 
   @override
   void initState() {
-
     super.initState();
     getCurrentLocation();
     CollectionReference reference = Firestore.instance.collection('Bin');
     reference.snapshots().listen((querySnapshot) {
       querySnapshot.documentChanges.forEach((change) {
         markerChanger(change);
-
-
       });
     });
     BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(size: Size(1, 1)), 'assets/images/redbin.png')
+            ImageConfiguration(devicePixelRatio: 2.0), 'assets/images/redbin.png')
         .then((onValue) {
       redIcon = onValue;
     });
 
     BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(size: Size(1, 1)), 'assets/images/greenbin.png')
+            ImageConfiguration(devicePixelRatio: 2.0), 'assets/images/greenbin.png')
         .then((onValue) {
       greenIcon = onValue;
     });
-
-
   }
-  markerChanger(DocumentChange change){
 
-    binState=change.document['state'];
-    markerId=MarkerId(change.document.documentID);
-//    print(markerId);
-//    print(binState);
-//    print(change.document['latitude']);
-//    print(change.document['longitude']);
-    markers[markerId]=Marker(
+  markerChanger(DocumentChange change) {
+    binState = change.document['state'];
+    markerId = MarkerId(change.document.documentID);
+    markers[markerId] = Marker(
       // This marker id can be anything that uniquely identifies each marker.
       markerId: markerId,
-      position: LatLng(double.parse(change.document['latitude']),double.parse(change.document['longitude'])),
+      position: LatLng(double.parse(change.document['latitude']),
+          double.parse(change.document['longitude'])),
       infoWindow: InfoWindow(
         title: 'Dustbin',
-        snippet: binState=='empty'?'Empty':'Full',
+        snippet: binState == 'empty' ? 'Empty' : 'Full',
       ),
-      icon: binState=='empty'?greenIcon:redIcon,
-      anchor: Offset(0.5,0.5),
-
+      icon: binState == 'empty' ? greenIcon : redIcon,
+      anchor: Offset(0.5, 0.5),
     );
-   // print(markers);
-
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -164,13 +136,14 @@ class _CustomerMap extends State<CustomerMap> {
           },
         ),
         floatingActionButton: FloatingActionButton(
-          backgroundColor: Colors.orange,
-          child: Icon(Icons.location_searching, 
-            color: Colors.black,),
-          onPressed: (){
-            getCurrentLocation();
-          }
-        ),
+            backgroundColor: Colors.orange,
+            child: Icon(
+              Icons.location_searching,
+              color: Colors.black,
+            ),
+            onPressed: () {
+              getCurrentLocation();
+            }),
       ),
     );
   }
