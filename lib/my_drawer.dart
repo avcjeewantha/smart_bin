@@ -22,7 +22,7 @@ class MyDrawer extends StatelessWidget {
               title: Text('Truck Map'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pushNamed(context, "/login");
+                Navigator.pushNamed(context, "/driver_map");
               },
             ),
             new Divider(),

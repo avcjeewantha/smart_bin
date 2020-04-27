@@ -97,4 +97,44 @@ class PhoneAuthWidgets {
       alignment: Alignment.centerLeft,
       child: Text(' $text',
           style: TextStyle(color: Colors.black, fontSize: 14.0)));
+
+  static Future<Widget> dialogBox(BuildContext context,bool isRideStarted,Function setPolylines) async=>
+      await showDialog(
+  context: context,
+  builder: (BuildContext context) {
+   return SimpleDialog(
+        title: Text("Are you going to start the ride ?",
+            style: TextStyle(
+              fontSize: 18,
+            )
+
+        ),
+        children: [
+          Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                new FlatButton(onPressed: () {
+                  Navigator.pop(context);
+                },
+
+                  child: Text('NO'),
+                  color: Colors.orange,
+                  textColor: Colors.white,
+                ),
+                new FlatButton(onPressed: () {
+                  isRideStarted = true;
+                  setPolylines(); // set distance place store longitude, lat in db. use known userId
+                  Navigator.pop(context);
+                },
+
+                  child: Text('YES'),
+                  color: Colors.orange,
+                  textColor: Colors.white,
+                )
+              ]
+          ),
+        ]
+    );
+  }
+);
 }
