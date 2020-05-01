@@ -22,6 +22,7 @@ class _DriverMap extends State<DriverMap> {
   FirebaseUser currentUser;
 
   Completer<GoogleMapController> _controller = Completer();
+
 //  Set<Marker> _markers = Set<Marker>();
   Map<MarkerId, Marker> _markers = <MarkerId, Marker>{};
   MarkerId markerId;
@@ -33,32 +34,40 @@ class _DriverMap extends State<DriverMap> {
   Set<Polyline> _polylines = {};
   List<LatLng> polylineCoordinates = [];
   List<LatLng> routeCoords;
- // PolylinePoints polylinePoints;
+
+  // PolylinePoints polylinePoints;
   String googleAPIKey = "AIzaSyDhhXJB0516oa3gdPj7UHf8DHUu4j0ysSc";
+
 //  String googleAPIKey = "113";
 
   PolylinePoints polylinePoints = PolylinePoints();
+
 // for my custom marker pins
   BitmapDescriptor sourceIcon;
   BitmapDescriptor destinationIcon;
   BitmapDescriptor redIcon;
   BitmapDescriptor greenIcon;
+
 // the user's initial location and current location
 // as it moves
   LocationData currentLocation;
+
 // a reference to the destination location
   LocationData destinationLocation;
+
 // wrapper around the location API
   Location location;
+
 //  PinInformation sourcePinInfo;
 //  PinInformation destinationPinInfo;
   GoogleMapPolyline googleMapPolyline;
 
 
 //   LatLng SOURCE_LOCATION = LatLng(42.747932, -71.167889);
-   LatLng DEST_LOCATION = LatLng(5.956048, 80.468666);
+  LatLng DEST_LOCATION = LatLng(5.956048, 80.468666);
+
 //check ride has started
-  bool isRideStarted=false;
+  bool isRideStarted = false;
 
 
   static final CameraPosition initialLocation = CameraPosition(
@@ -67,14 +76,13 @@ class _DriverMap extends State<DriverMap> {
   );
 
   @override
-  void initState()  {
+  void initState() {
     super.initState();
-
 
 
     // create an instance of Location
     location = new Location();
-   // polylinePoints = PolylinePoints();
+    // polylinePoints = PolylinePoints();
     googleMapPolyline = new GoogleMapPolyline(apiKey: googleAPIKey);
     setSourceAndDestinationIcons();
     setInitialDetail();
@@ -83,95 +91,98 @@ class _DriverMap extends State<DriverMap> {
       // cLoc contains the lat and long of the
       // current user's position in real time,
       // so we're holding on to it
-       currentLocation = cLoc;
-       if(isRideStarted){
-         locationUpdater(currentLocation);
-       }
+      currentLocation = cLoc;
+      if (isRideStarted) {
+        locationUpdater(currentLocation);
+      }
 
-     // updatePinOnMap();
+      // updatePinOnMap();
     });
-   // print(currentLocation);
+    // print(currentLocation);
     // set custom marker pins
-   // setSourceAndDestinationIcons();
+    // setSourceAndDestinationIcons();
 
     // dustbin markers
     binReference = Firestore.instance.collection('Bin');
     binReference.snapshots().listen((querySnapshot) {
       querySnapshot.documentChanges.forEach((change) {
         markerChanger(change);
-
-
       });
     });
 
-   print (_markers);
+    print(_markers);
   }
-  void locationUpdater(LocationData currentLocationData){
-    Firestore.instance.collection('driver').document('${currentUser.uid}').setData(
-      {
-        'latitude':currentLocationData.latitude,
-        'longitude':  currentLocationData.longitude
-      }
-    ).catchError((onError){
+
+  void locationUpdater(LocationData currentLocationData) {
+    Firestore.instance.collection('driver')
+        .document('${currentUser.uid}')
+        .setData(
+        {
+          'latitude': currentLocationData.latitude,
+          'longitude': currentLocationData.longitude
+        }
+    )
+        .catchError((onError) {
       print(onError);
     });
   }
 
   void setSourceAndDestinationIcons() async {
-   await BitmapDescriptor.fromAssetImage(
+    await BitmapDescriptor.fromAssetImage(
         ImageConfiguration(devicePixelRatio: 2.0), 'assets/images/truck.png')
         .then((onValue) {
       sourceIcon = onValue;
     });
 
-   await BitmapDescriptor.fromAssetImage(ImageConfiguration(devicePixelRatio: 2.0),
+    await BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(devicePixelRatio: 2.0),
         'assets/images/destination.png')
         .then((onValue) {
       destinationIcon = onValue;
     });
 
-   BitmapDescriptor.fromAssetImage(
-       ImageConfiguration(devicePixelRatio: 2.0), 'assets/images/redbin.png')
-       .then((onValue) {
-     redIcon = onValue;
-   });
+    BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(devicePixelRatio: 2.0), 'assets/images/redbin.png')
+        .then((onValue) {
+      redIcon = onValue;
+    });
 
-   BitmapDescriptor.fromAssetImage(
-       ImageConfiguration(devicePixelRatio: 2.0), 'assets/images/greenbin.png')
-       .then((onValue) {
-     greenIcon = onValue;
-   });
+    BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(devicePixelRatio: 2.0), 'assets/images/greenbin.png')
+        .then((onValue) {
+      greenIcon = onValue;
+    });
   }
 
-  markerChanger(DocumentChange change){
+  markerChanger(DocumentChange change) {
 //    print('change');
 //    print(change.document.data);
 //  print("markerchanger");
-    binState=change.document['state'];
-    markerId=MarkerId(change.document.documentID);
+    binState = change.document['state'];
+    markerId = MarkerId(change.document.documentID);
 //    print(change.document.data);
-    markerPosition=LatLng(double.parse(change.document['latitude']),double.parse(change.document['longitude']));
-//  print(markerPosition);
+    markerPosition = LatLng(double.parse(change.document['latitude']),
+        double.parse(change.document['longitude']));
+  print(markerPosition);
 //    print(markerId);
 //    print(binState);
 //    print(change.document['latitude']);
 //    print(change.document['longitude']);
-    _markers[markerId]=Marker(
+    _markers[markerId] = Marker(
       // This marker id can be anything that uniquely identifies each marker.
       markerId: markerId,
       position: markerPosition,
       infoWindow: InfoWindow(
         title: 'Dustbin',
-        snippet: binState=='empty'?'Empty':'Full',
+        snippet: binState == 'empty' ? 'Empty' : 'Full',
       ),
-      onTap: () async{
-        currentDestination=markerPosition;
-        print(currentDestination);
-       await PhoneAuthWidgets.dialogBox(context, isRideStarted, setPolylines);
-
+      onTap: () async {
+       // currentDestination = _markers[markerId].position;
+     //   print();
+        await PhoneAuthWidgets.dialogBox(context, isRideStarted, setPolylines);
       },
-      icon: binState=='empty'?greenIcon:redIcon,
-      anchor: Offset(0.5,0.5),
+      icon: binState == 'empty' ? greenIcon : redIcon,
+      anchor: Offset(0.5, 0.5),
 
     );
     // print(markers);
@@ -179,12 +190,11 @@ class _DriverMap extends State<DriverMap> {
   }
 
   void setInitialDetail() async {
-
-    currentUser=await FirebaseAuth.instance.currentUser();
+    currentUser = await FirebaseAuth.instance.currentUser();
     // set the initial location by pulling the user's
     // current location from the location's getLocation()
     currentLocation = await location.getLocation();
-    print (currentLocation);
+    print(currentLocation);
     // hard-coded destination for this example
 
     ///////// this should be implemented by us ////////////////////////////////////
@@ -211,17 +221,18 @@ class _DriverMap extends State<DriverMap> {
               markers: Set<Marker>.of(_markers.values),
               polylines: _polylines,
               mapType: MapType.normal,
-//              onTap: (LatLng latLng) async {
+              onTap: (LatLng latLng) async {
 //                print(latLng);
 //                QuerySnapshot object=await reference.where('latitude',isEqualTo:latLng.latitude).where('longitude',isEqualTo:latLng.longitude).getDocuments();
 //                print (object.documents.isNotEmpty);
 //                if(object.documents.isNotEmpty){
 //
 //                }
-//              },
+//                currentDestination=latLng;
+              },
               initialCameraPosition: initialLocation,
               onMapCreated: (GoogleMapController controller) {
-             //   controller.setMapStyle(Utils.mapStyles);
+                //   controller.setMapStyle(Utils.mapStyles);
                 _controller.complete(controller);
 
                 //setInitialLocation();
@@ -249,36 +260,37 @@ class _DriverMap extends State<DriverMap> {
 //                    shape: CircleBorder(),
 //                  ),
 //                  child:
-                  RaisedButton(
-                    textColor:Colors.orange,
-                    disabledTextColor:Colors.orange,
-                      disabledColor: Colors.orange,
-                      color: Colors.white,
-                       onPressed: isRideStarted==false?null: () {
-                         isRideStarted=false;
-                         //delete diver's record
-                         Firestore.instance.collection('driver').document('${currentUser.uid}').delete();
+                RaisedButton(
+                  textColor: Colors.orange,
+                  disabledTextColor: Colors.orange,
+                  disabledColor: Colors.orange,
+                  color: Colors.white,
+                  onPressed: isRideStarted == false ? null : () {
+                    isRideStarted = false;
+                    //delete diver's record
+                    Firestore.instance.collection('driver').document(
+                        '${currentUser.uid}').delete();
 
 
                     // delete polyline and object from the database //make sure you have known user id
-                    },
-                    child: Text("Stop Ride",
+                  },
+                  child: Text("Stop Ride",
                     style: TextStyle(fontSize: 20),
-                    ),
+                  ),
 
-                  ) ,
-            //    ),
+                ),
+                //    ),
 
               ],
             ),
           );
-          },),
+        },),
 
       ),
     );
   }
-  void showPinsOnMap() {
 
+  void showPinsOnMap() {
     print("showPinsOnMap");
     print(currentLocation);
     // get a LatLng for the source location
@@ -305,7 +317,7 @@ class _DriverMap extends State<DriverMap> {
 
     // add the initial source location pin
     setState(() {
-      _markers[MarkerId('sourcePin')]= Marker(
+      _markers[MarkerId('sourcePin')] = Marker(
           markerId: MarkerId('sourcePin'),
           position: pinPosition,
 //        onTap: () {
@@ -331,11 +343,10 @@ class _DriverMap extends State<DriverMap> {
 
     // set the route lines on the map from source to destination
     // for more info follow this tutorial
-  setPolylines();
+    setPolylines();
   }
 
   void setPolylines() async {
-
 //    var permissions =
 //    await Permission.getPermissionsStatus([PermissionName.Location]);
 //    if (permissions[0].permissionStatus == PermissionStatus.notAgain) {
@@ -348,13 +359,13 @@ class _DriverMap extends State<DriverMap> {
 //    await Permission.getPermissionsStatus([PermissionName.Location]);
 //    print(permissions[0].permissionName);
 //        print(permissions[0].permissionStatus);
-    List<PointLatLng> result = await
-    polylinePoints?.getRouteBetweenCoordinates(
-        googleAPIKey,
-        5.980718,
-        80.365755,
-        5.982468,
-        80.366463);
+//    List<PointLatLng> result = await
+//    polylinePoints?.getRouteBetweenCoordinates(
+//        googleAPIKey,
+//        5.980718,
+//        80.365755,
+//        5.982468,
+//        80.366463);
 //      routeCoords = await googleMapPolyline.getCoordinatesWithLocation(
 ////          origin: LatLng(5.980718, 80.365755),
 ////          destination: LatLng(5.982468, 80.366463),
@@ -364,31 +375,31 @@ class _DriverMap extends State<DriverMap> {
 //          print(onError);
 //    });
 //  ;}
-    print("result");
-    print(result);
-    if(result.isNotEmpty){
-      // loop through all PointLatLng points and convert them
-      // to a list of LatLng, required by the Polyline
-      result.forEach((PointLatLng point){
-        polylineCoordinates.add(
-            LatLng(point.latitude, point.longitude));
-      });
-    }
-    setState(() {
-      // create a Polyline instance
-      // with an id, an RGB color and the list of LatLng pairs
-      Polyline polyline = Polyline(
-          polylineId: PolylineId("destination"),
-          color: Color.fromARGB(255, 40, 122, 198),
-          points: polylineCoordinates
-      );
+//    print("result");
+//    print(result);
+//    if(result.isNotEmpty){
+//      // loop through all PointLatLng points and convert them
+//      // to a list of LatLng, required by the Polyline
+//      result.forEach((PointLatLng point){
+//        polylineCoordinates.add(
+//            LatLng(point.latitude, point.longitude));
+//      });
+//    }
+//    setState(() {
+//      // create a Polyline instance
+//      // with an id, an RGB color and the list of LatLng pairs
+//      Polyline polyline = Polyline(
+//          polylineId: PolylineId("destination"),
+//          color: Color.fromARGB(255, 40, 122, 198),
+//          points: polylineCoordinates
+//      );
 
-      // add the constructed polyline as a set of points
-      // to the polyline set, which will eventually
-      // end up showing up on the map
-      _polylines.add(polyline);
-    });
-    print ('????????????????????????????');
+    // add the constructed polyline as a set of points
+    // to the polyline set, which will eventually
+    // end up showing up on the map
+//      _polylines.add(polyline);
+//    });
+//    print ('????????????????????????????');
 //    print(routeCoords);
 //    setState(() {
 //    _polylines.add(Polyline(
@@ -400,36 +411,35 @@ class _DriverMap extends State<DriverMap> {
 //        startCap: Cap.roundCap,
 //        endCap: Cap.buttCap));
 //  });
+//  }
+
+
+    List<PointLatLng> result = await polylinePoints.getRouteBetweenCoordinates(
+        googleAPIKey,
+        currentLocation.latitude,
+        currentLocation.longitude,
+        currentDestination.latitude,
+        currentDestination.longitude);
+    print(googleAPIKey);
+    print(currentLocation);
+    print(currentDestination);
+    print(result.length);
+    if (result.isNotEmpty) {
+      result.forEach((PointLatLng point) {
+        polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+      });
+
+      setState(() {
+        _polylines.add(Polyline(
+            width: 2, // set the width of the polylines
+            polylineId: PolylineId("poly"),
+            color: Color.fromARGB(255, 40, 122, 198),
+            points: polylineCoordinates));
+      });
+    }
   }
 
-
-//    List<PointLatLng> result = await polylinePoints.getRouteBetweenCoordinates(
-//        googleAPIKey,
-//        currentLocation.latitude,
-//        currentLocation.longitude,
-//        destinationLocation.latitude,
-//        destinationLocation.longitude);
-//    print (googleAPIKey);
-//    print (currentLocation);
-//    print (destinationLocation);
-//    print (result.length);
-//    if (result.isNotEmpty) {
-//      result.forEach((PointLatLng point) {
-//        polylineCoordinates.add(LatLng(point.latitude, point.longitude));
-//      });
-//
-//      setState(() {
-//        _polylines.add(Polyline(
-//            width: 2, // set the width of the polylines
-//            polylineId: PolylineId("poly"),
-//            color: Color.fromARGB(255, 40, 122, 198),
-//            points: polylineCoordinates));
-//      });
-//    }
-
 }
-
-
 
 
 
