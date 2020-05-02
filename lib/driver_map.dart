@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 import 'package:location/location.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_map_polyline/google_map_polyline.dart';
@@ -20,7 +21,7 @@ class _DriverMap extends State<DriverMap> {
   CollectionReference binReference;
   CollectionReference diverReference;
   FirebaseUser currentUser;
-
+   GoogleMap googleMap;
   Completer<GoogleMapController> _controller = Completer();
 
 //  Set<Marker> _markers = Set<Marker>();
@@ -29,6 +30,7 @@ class _DriverMap extends State<DriverMap> {
   LatLng markerPosition;
   LatLng currentDestination;
   String binState;
+  String truckState="empty";
 
   // for my drawn routes on the map
   Set<Polyline> _polylines = {};
@@ -51,6 +53,7 @@ class _DriverMap extends State<DriverMap> {
 // the user's initial location and current location
 // as it moves
   LocationData currentLocation;
+
 
 // a reference to the destination location
   LocationData destinationLocation;
@@ -79,13 +82,13 @@ class _DriverMap extends State<DriverMap> {
   void initState() {
     super.initState();
 
-
     // create an instance of Location
     location = new Location();
     // polylinePoints = PolylinePoints();
     googleMapPolyline = new GoogleMapPolyline(apiKey: googleAPIKey);
     setSourceAndDestinationIcons();
     setInitialDetail();
+
 
     location.onLocationChanged.listen((LocationData cLoc) {
       // cLoc contains the lat and long of the
@@ -94,6 +97,9 @@ class _DriverMap extends State<DriverMap> {
       currentLocation = cLoc;
       if (isRideStarted) {
         locationUpdater(currentLocation);
+        setPolylines();
+      }else{
+        polylineCoordinates.clear();
       }
 
       // updatePinOnMap();
@@ -114,10 +120,11 @@ class _DriverMap extends State<DriverMap> {
   }
 
   void locationUpdater(LocationData currentLocationData) {
-    Firestore.instance.collection('driver')
+    Firestore.instance.collection('Truck')
         .document('${currentUser.uid}')
         .setData(
         {
+          'state':truckState,
           'latitude': currentLocationData.latitude,
           'longitude': currentLocationData.longitude
         }
@@ -161,7 +168,7 @@ class _DriverMap extends State<DriverMap> {
     binState = change.document['state'];
     markerId = MarkerId(change.document.documentID);
 //    print(change.document.data);
-    markerPosition = LatLng(double.parse(change.document['latitude']),
+    final markerPosition = LatLng(double.parse(change.document['latitude']),
         double.parse(change.document['longitude']));
   print(markerPosition);
 //    print(markerId);
@@ -177,9 +184,9 @@ class _DriverMap extends State<DriverMap> {
         snippet: binState == 'empty' ? 'Empty' : 'Full',
       ),
       onTap: () async {
-       // currentDestination = _markers[markerId].position;
-     //   print();
-        await PhoneAuthWidgets.dialogBox(context, isRideStarted, setPolylines);
+        currentDestination = markerPosition;
+       // print(markerPosition);
+        await PhoneAuthWidgets.dialogBox(context, setPolylines);
       },
       icon: binState == 'empty' ? greenIcon : redIcon,
       anchor: Offset(0.5, 0.5),
@@ -229,10 +236,12 @@ class _DriverMap extends State<DriverMap> {
 //
 //                }
 //                currentDestination=latLng;
+
               },
               initialCameraPosition: initialLocation,
               onMapCreated: (GoogleMapController controller) {
                 //   controller.setMapStyle(Utils.mapStyles);
+
                 _controller.complete(controller);
 
                 //setInitialLocation();
@@ -260,25 +269,58 @@ class _DriverMap extends State<DriverMap> {
 //                    shape: CircleBorder(),
 //                  ),
 //                  child:
+                truckState=="empty"?
                 RaisedButton(
                   textColor: Colors.orange,
                   disabledTextColor: Colors.orange,
                   disabledColor: Colors.orange,
                   color: Colors.white,
                   onPressed: isRideStarted == false ? null : () {
-                    isRideStarted = false;
                     //delete diver's record
-                    Firestore.instance.collection('driver').document(
-                        '${currentUser.uid}').delete();
+                    Firestore.instance.collection('Truck').document(
+                        '${currentUser.uid}').updateData({
+                      "state":"full"
+                    }).then((value){
+                      setState((){
+                        truckState="full";
+                      });
+
+                    }).catchError((onError){
+                      print(onError);
+                    });
+
+                    // delete polyline and object from the database //make sure you have known user id
+                  },
+                  child: Text("Change State",
+                    style: TextStyle(fontSize: 20),
+                  ),
+
+                ):RaisedButton(
+                  textColor: Colors.orange,
+                  disabledTextColor: Colors.orange,
+                  disabledColor: Colors.orange,
+                  color: Colors.white,
+                  onPressed: isRideStarted == false ? null : () {
+                    Firestore.instance.collection('Truck').document(
+                        '${currentUser.uid}').delete().then((value){
+                      isRideStarted = false;
+                      //           polylineCoordinates.clear();
+                      //delete diver's record
+                      print(truckState);
+                      creatingSourcePin( LatLng(currentLocation.latitude, currentLocation.longitude),truckState);
+
+                    }).catchError((onError){
+                      print(onError);
+                    });
 
 
                     // delete polyline and object from the database //make sure you have known user id
                   },
-                  child: Text("Stop Ride",
+                  child: Text("End Ride",
                     style: TextStyle(fontSize: 20),
                   ),
 
-                ),
+                )
                 //    ),
 
               ],
@@ -300,7 +342,7 @@ class _DriverMap extends State<DriverMap> {
     // get a LatLng out of the LocationData object
 //    var destPosition =
 //    LatLng(destinationLocation.latitude, destinationLocation.longitude);
-
+    creatingSourcePin(pinPosition,truckState);
 //    sourcePinInfo = PinInformation(
 //        locationName: "Start Location",
 //        location: SOURCE_LOCATION,
@@ -315,6 +357,21 @@ class _DriverMap extends State<DriverMap> {
 //        avatarPath: "assets/friend2.jpg",
 //        labelColor: Colors.purple);
 
+
+
+    // set the route lines on the map from source to destination
+    // for more info follow this tutorial
+    if(currentDestination!=null){
+      setPolylines().then((value) {
+        setState(() {
+          isRideStarted=value;
+          print(isRideStarted);
+        });
+
+      });
+    }
+  }
+  void creatingSourcePin(LatLng pinPosition, String state){
     // add the initial source location pin
     setState(() {
       _markers[MarkerId('sourcePin')] = Marker(
@@ -326,6 +383,10 @@ class _DriverMap extends State<DriverMap> {
 //            pinPillPosition = 0;
 //          });
 //        },
+          infoWindow:InfoWindow(
+              title: 'Truck',
+              snippet: state
+          ),
           icon: sourceIcon);
       // destination pin we don't want a destination pin
 //      _markers[MarkerId('destPin')]=Marker(
@@ -341,12 +402,10 @@ class _DriverMap extends State<DriverMap> {
 
     });
 
-    // set the route lines on the map from source to destination
-    // for more info follow this tutorial
-    setPolylines();
   }
-
-  void setPolylines() async {
+  Future<bool> setPolylines() async {
+   print(isRideStarted);
+    print("RHIS IS EORKING @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@222");
 //    var permissions =
 //    await Permission.getPermissionsStatus([PermissionName.Location]);
 //    if (permissions[0].permissionStatus == PermissionStatus.notAgain) {
@@ -425,6 +484,7 @@ class _DriverMap extends State<DriverMap> {
     print(currentDestination);
     print(result.length);
     if (result.isNotEmpty) {
+      polylineCoordinates.clear();
       result.forEach((PointLatLng point) {
         polylineCoordinates.add(LatLng(point.latitude, point.longitude));
       });
@@ -436,8 +496,13 @@ class _DriverMap extends State<DriverMap> {
             color: Color.fromARGB(255, 40, 122, 198),
             points: polylineCoordinates));
       });
+      return true;
+
+    //  isRideStarted=true;
     }
   }
+
+
 
 }
 

@@ -98,7 +98,7 @@ class PhoneAuthWidgets {
       child: Text(' $text',
           style: TextStyle(color: Colors.black, fontSize: 14.0)));
 
-  static Future<Widget> dialogBox(BuildContext context,bool isRideStarted,Function setPolylines) async=>
+  static Future<Widget> dialogBox(BuildContext context,Function setPolylines) async=>
       await showDialog(
   context: context,
   builder: (BuildContext context) {
@@ -122,7 +122,7 @@ class PhoneAuthWidgets {
                   textColor: Colors.white,
                 ),
                 new FlatButton(onPressed: () {
-                  isRideStarted = true;
+//                  isRideStarted = true;
                   setPolylines(); // set distance place store longitude, lat in db. use known userId
                   Navigator.pop(context);
                 },
