@@ -14,9 +14,11 @@ class _CustomerMap extends State<CustomerMap> {
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   MarkerId markerId;
   String binState;
+  String truckState;
   BitmapDescriptor redIcon;
   BitmapDescriptor greenIcon;
   GoogleMapController mapController;
+  BitmapDescriptor truckIcon;
   StreamSubscription _locationSubscription;
   Marker meMarker;
   Circle meCircle;
@@ -86,10 +88,16 @@ class _CustomerMap extends State<CustomerMap> {
   void initState() {
     super.initState();
     getCurrentLocation();
-    CollectionReference reference = Firestore.instance.collection('Bin');
-    reference.snapshots().listen((querySnapshot) {
+    CollectionReference binReference = Firestore.instance.collection('Bin');
+    CollectionReference truckReference = Firestore.instance.collection('Truck');
+    binReference.snapshots().listen((querySnapshot) {
       querySnapshot.documentChanges.forEach((change) {
-        markerChanger(change);
+        binMarkerChanger(change);
+      });
+    });
+    truckReference.snapshots().listen((querySnapshot) {
+      querySnapshot.documentChanges.forEach((change) {
+        truckMarkerChanger(change);
       });
     });
     BitmapDescriptor.fromAssetImage(
@@ -103,9 +111,15 @@ class _CustomerMap extends State<CustomerMap> {
         .then((onValue) {
       greenIcon = onValue;
     });
+
+    BitmapDescriptor.fromAssetImage(
+            ImageConfiguration(devicePixelRatio: 2.0), 'assets/images/truck.png')
+        .then((onValue) {
+      truckIcon = onValue;
+    });
   }
 
-  markerChanger(DocumentChange change) {
+  binMarkerChanger(DocumentChange change) {
     binState = change.document['state'];
     markerId = MarkerId(change.document.documentID);
     markers[markerId] = Marker(
@@ -118,6 +132,23 @@ class _CustomerMap extends State<CustomerMap> {
         snippet: binState == 'empty' ? 'Empty' : 'Full',
       ),
       icon: binState == 'empty' ? greenIcon : redIcon,
+      anchor: Offset(0.5, 0.5),
+    );
+  }
+
+  truckMarkerChanger(DocumentChange change) {
+    truckState = change.document['state'];
+    markerId = MarkerId(change.document.documentID);
+    markers[markerId] = Marker(
+      // This marker id can be anything that uniquely identifies each marker.
+      markerId: markerId,
+      position: LatLng(double.parse(change.document['latitude']),
+          double.parse(change.document['longitude'])),
+      infoWindow: InfoWindow(
+        title: 'Truck',
+        snippet: truckState == 'full' ? 'This truck is full.' : 'Collecting garbage.',
+      ),
+      icon: truckIcon,
       anchor: Offset(0.5, 0.5),
     );
   }
