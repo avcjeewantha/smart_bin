@@ -142,7 +142,7 @@ class _DriverMap extends State<DriverMap> {
 
     _locationTracker.onLocationChanged.listen((LocationData cLoc) {
       if (navigation == true) {
-        setPolylines();
+         setPolylines();
       } else {
         polylineCoordinates.clear();
       }
