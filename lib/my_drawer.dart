@@ -21,7 +21,6 @@ class MyDrawer extends StatelessWidget {
             ListTile(
               title: Text('Truck Map'),
               onTap: () {
-
                 AuthService().getCurrentUser().then((user) {
                   if (user != null) {
                     Navigator.pop(context);

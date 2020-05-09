@@ -125,8 +125,8 @@ class _CustomerMap extends State<CustomerMap> {
     markers[markerId] = Marker(
       // This marker id can be anything that uniquely identifies each marker.
       markerId: markerId,
-      position: LatLng(double.parse(change.document['latitude']),
-          double.parse(change.document['longitude'])),
+      position: LatLng(change.document['latitude'],
+          change.document['longitude']),
       infoWindow: InfoWindow(
         title: 'Dustbin',
         snippet: binState == 'empty' ? 'Empty' : 'Full',
@@ -142,8 +142,8 @@ class _CustomerMap extends State<CustomerMap> {
     markers[markerId] = Marker(
       // This marker id can be anything that uniquely identifies each marker.
       markerId: markerId,
-      position: LatLng(double.parse(change.document['latitude']),
-          double.parse(change.document['longitude'])),
+      position: LatLng(change.document['latitude'],
+          change.document['longitude']),
       infoWindow: InfoWindow(
         title: 'Truck',
         snippet: truckState == 'full' ? 'This truck is full.' : 'Collecting garbage.',

@@ -62,9 +62,6 @@ class _HomePageState extends State<HomePage> {
                         complain.clear();
                         await _showDialog(context);
                         if (snackbarMessage != null) {
-//                 print("snackbarMessage not null");
-//                 print(snackbarMessage);
-
                           ShowFlushbar.showMessage(snackbarMessage, context);
                         }
                       }),

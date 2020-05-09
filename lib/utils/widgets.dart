@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../data_models/countries.dart';
 
 class PhoneAuthWidgets {
-
   static Widget searchCountry(TextEditingController controller) => Padding(
         padding:
             const EdgeInsets.only(left: 8.0, top: 8.0, bottom: 2.0, right: 8.0),
@@ -35,9 +34,7 @@ class PhoneAuthWidgets {
         ),
       );
 
-  static Widget oTPField(
-          TextEditingController controller) =>
-      Card(
+  static Widget oTPField(TextEditingController controller) => Card(
         child: TextFormField(
           controller: controller,
           autofocus: true,
@@ -50,7 +47,8 @@ class PhoneAuthWidgets {
         ),
       );
 
-  static Widget selectableWidget(Country country, Function(Country) selectThisCountry) =>
+  static Widget selectableWidget(
+          Country country, Function(Country) selectThisCountry) =>
       Material(
         color: Colors.white,
         type: MaterialType.canvas,
@@ -98,43 +96,38 @@ class PhoneAuthWidgets {
       child: Text(' $text',
           style: TextStyle(color: Colors.black, fontSize: 14.0)));
 
-  static Future<Widget> dialogBox(BuildContext context,Function setPolylines) async=>
+  static Future<Widget> dialogBox(
+          BuildContext context, Function setPolylines) async =>
       await showDialog(
-  context: context,
-  builder: (BuildContext context) {
-   return SimpleDialog(
-        title: Text("Are you going to start the ride ?",
-            style: TextStyle(
-              fontSize: 18,
-            )
-
-        ),
-        children: [
-          Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                new FlatButton(onPressed: () {
-                  Navigator.pop(context);
-                },
-
-                  child: Text('NO'),
-                  color: Colors.orange,
-                  textColor: Colors.white,
-                ),
-                new FlatButton(onPressed: () {
-//                  isRideStarted = true;
-                  setPolylines(); // set distance place store longitude, lat in db. use known userId
-                  Navigator.pop(context);
-                },
-
-                  child: Text('YES'),
-                  color: Colors.orange,
-                  textColor: Colors.white,
-                )
-              ]
-          ),
-        ]
-    );
-  }
-);
+          context: context,
+          builder: (BuildContext context) {
+            return SimpleDialog(
+                title: Text("Do you want to start navigation ?",
+                    style: TextStyle(
+                      fontSize: 18,
+                    )),
+                children: [
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        new FlatButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text('NO'),
+                          color: Colors.orange,
+                          textColor: Colors.white,
+                        ),
+                        new FlatButton(
+                          onPressed: () {
+                            setPolylines();
+                            Navigator.pop(context);
+                          },
+                          child: Text('YES'),
+                          color: Colors.orange,
+                          textColor: Colors.white,
+                        )
+                      ]),
+                ]);
+          });
 }
