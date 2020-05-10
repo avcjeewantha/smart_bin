@@ -202,23 +202,29 @@ class _DriverMap extends State<DriverMap> {
   }
 
   truckMarkerChanger(DocumentChange change) {
-    if (change.document.documentID != currentUser.uid) {
-      truckState = change.document['state'];
-      markerId = MarkerId(change.document.documentID);
-      markers[markerId] = Marker(
-        // This marker id can be anything that uniquely identifies each marker.
-        markerId: markerId,
-        position:
-            LatLng(change.document['latitude'], change.document['longitude']),
-        infoWindow: InfoWindow(
-          title: 'Truck',
-          snippet: truckState == 'full'
-              ? 'This truck is full.'
-              : 'Collecting garbage.',
-        ),
-        icon: truckIcon,
-        anchor: Offset(0.5, 0.5),
-      );
+    if(change.type.toString() != 'DocumentChangeType.removed'){
+      if (change.document.documentID != currentUser.uid) {
+        truckState = change.document['state'];
+        markerId = MarkerId(change.document.documentID);
+        markers[markerId] = Marker(
+          // This marker id can be anything that uniquely identifies each marker.
+          markerId: markerId,
+          position:
+              LatLng(change.document['latitude'], change.document['longitude']),
+          infoWindow: InfoWindow(
+            title: 'Truck',
+            snippet: truckState == 'full'
+                ? 'This truck is full.'
+                : 'Collecting garbage.',
+          ),
+          icon: truckIcon,
+          anchor: Offset(0.5, 0.5),
+        );
+      }
+    }else{
+      setState(() {
+        markers.remove(MarkerId(change.document.documentID));
+      });   
     }
   }
 

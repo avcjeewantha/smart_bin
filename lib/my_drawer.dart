@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:smart_bin/authservices.dart';
-import 'package:path/path.dart';
 
 import 'driver_map.dart';
 
