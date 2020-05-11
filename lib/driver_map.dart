@@ -142,14 +142,14 @@ class _DriverMap extends State<DriverMap> {
 
     _locationTracker.onLocationChanged.listen((LocationData cLoc) {
       if (navigation == true) {
-         setPolylines();
+        setPolylines();
       } else {
         polylineCoordinates.clear();
       }
       locationUpdater(cLoc);
     });
     polylineCoordinates.clear();
-    isRideStarted =false;
+    isRideStarted = false;
   }
 
   void locationUpdater(LocationData currentLocationData) {
@@ -179,30 +179,36 @@ class _DriverMap extends State<DriverMap> {
   }
 
   binMarkerChanger(DocumentChange change) {
-    binState = change.document['state'];
-    markerId = MarkerId(change.document.documentID);
-    final markerPosition =
-        LatLng(change.document['latitude'], change.document['longitude']);
-    markers[markerId] = Marker(
-      markerId: markerId,
-      position: markerPosition,
-      infoWindow: InfoWindow(
-        title: 'Dustbin',
-        snippet: binState == 'empty' ? 'Empty' : 'Full',
-      ),
-      onTap: () async {
-        currentDestination = markerPosition;
-        if (isRideStarted) {
-          await PhoneAuthWidgets.dialogBox(context, setPolylines);
-        }
-      },
-      icon: binState == 'empty' ? greenIcon : redIcon,
-      anchor: Offset(0.5, 0.5),
-    );
+    if (change.type.toString() != 'DocumentChangeType.removed') {
+      binState = change.document['state'];
+      markerId = MarkerId(change.document.documentID);
+      final markerPosition =
+          LatLng(change.document['latitude'], change.document['longitude']);
+      markers[markerId] = Marker(
+        markerId: markerId,
+        position: markerPosition,
+        infoWindow: InfoWindow(
+          title: 'Dustbin',
+          snippet: binState == 'empty' ? 'Empty' : 'Full',
+        ),
+        onTap: () async {
+          currentDestination = markerPosition;
+          if (isRideStarted) {
+            await PhoneAuthWidgets.dialogBox(context, setPolylines);
+          }
+        },
+        icon: binState == 'empty' ? greenIcon : redIcon,
+        anchor: Offset(0.5, 0.5),
+      );
+    } else {
+      setState(() {
+        markers.remove(MarkerId(change.document.documentID));
+      });
+    }
   }
 
   truckMarkerChanger(DocumentChange change) {
-    if(change.type.toString() != 'DocumentChangeType.removed'){
+    if (change.type.toString() != 'DocumentChangeType.removed') {
       if (change.document.documentID != currentUser.uid) {
         truckState = change.document['state'];
         markerId = MarkerId(change.document.documentID);
@@ -214,17 +220,17 @@ class _DriverMap extends State<DriverMap> {
           infoWindow: InfoWindow(
             title: 'Truck',
             snippet: truckState == 'full'
-                ? 'This truck is full.'
-                : 'Collecting garbage.',
+                ? 'This truck is full'
+                : 'Collecting garbage',
           ),
           icon: truckIcon,
           anchor: Offset(0.5, 0.5),
         );
       }
-    }else{
+    } else {
       setState(() {
         markers.remove(MarkerId(change.document.documentID));
-      });   
+      });
     }
   }
 
