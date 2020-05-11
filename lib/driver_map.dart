@@ -8,7 +8,6 @@ import 'package:google_map_polyline/google_map_polyline.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:smart_bin/authservices.dart';
-import 'package:smart_bin/my_drawer.dart';
 import 'package:smart_bin/utils/flushbar.dart';
 import 'package:smart_bin/utils/widgets.dart';
 
@@ -271,11 +270,6 @@ class _DriverMap extends State<DriverMap> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
-                      IconButton(
-                          icon: Icon(Icons.menu),
-                          onPressed: () {
-                            _scaffoldKey.currentState.openDrawer();
-                          }),
                       RaisedButton(
                         textColor: Colors.orange,
                         disabledTextColor: Colors.orange,
@@ -335,7 +329,6 @@ class _DriverMap extends State<DriverMap> {
                       ),
                     ]),
               ),
-        drawer: MyDrawer(),
       ),
     );
   }
