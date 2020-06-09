@@ -53,15 +53,16 @@ class AuthService {
 
   Future<FirebaseUser> getCurrentUser() async {
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
-    if (user != null){
-        SearchService().searchPhoneNo(user.phoneNumber).then((QuerySnapshot docs) {
-          if (docs.documents.length == 1) {
-            print(docs.documents);
-            okUser = user;
-          }
+    if (user != null) {
+      SearchService()
+          .searchPhoneNo(user.phoneNumber)
+          .then((QuerySnapshot docs) {
+        if (docs.documents.length == 1) {
+          print(docs.documents);
+          okUser = user;
+        }
       });
     }
     return okUser;
-    }
-
+  }
 }

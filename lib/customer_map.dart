@@ -100,57 +100,71 @@ class _CustomerMap extends State<CustomerMap> {
         truckMarkerChanger(change);
       });
     });
-    BitmapDescriptor.fromAssetImage(
-            ImageConfiguration(devicePixelRatio: 2.0), 'assets/images/redbin.png')
+    BitmapDescriptor.fromAssetImage(ImageConfiguration(devicePixelRatio: 2.0),
+            'assets/images/redbin.png')
         .then((onValue) {
       redIcon = onValue;
     });
 
-    BitmapDescriptor.fromAssetImage(
-            ImageConfiguration(devicePixelRatio: 2.0), 'assets/images/greenbin.png')
+    BitmapDescriptor.fromAssetImage(ImageConfiguration(devicePixelRatio: 2.0),
+            'assets/images/greenbin.png')
         .then((onValue) {
       greenIcon = onValue;
     });
 
-    BitmapDescriptor.fromAssetImage(
-            ImageConfiguration(devicePixelRatio: 2.0), 'assets/images/truck.png')
+    BitmapDescriptor.fromAssetImage(ImageConfiguration(devicePixelRatio: 2.0),
+            'assets/images/truck.png')
         .then((onValue) {
       truckIcon = onValue;
     });
   }
 
   binMarkerChanger(DocumentChange change) {
-    binState = change.document['state'];
-    markerId = MarkerId(change.document.documentID);
-    markers[markerId] = Marker(
-      // This marker id can be anything that uniquely identifies each marker.
-      markerId: markerId,
-      position: LatLng(double.parse(change.document['latitude']),
-          double.parse(change.document['longitude'])),
-      infoWindow: InfoWindow(
-        title: 'Dustbin',
-        snippet: binState == 'empty' ? 'Empty' : 'Full',
-      ),
-      icon: binState == 'empty' ? greenIcon : redIcon,
-      anchor: Offset(0.5, 0.5),
-    );
+    if (change.type.toString() != 'DocumentChangeType.removed') {
+      binState = change.document['state'];
+      markerId = MarkerId(change.document.documentID);
+      markers[markerId] = Marker(
+        // This marker id can be anything that uniquely identifies each marker.
+        markerId: markerId,
+        position:
+            LatLng(change.document['latitude'], change.document['longitude']),
+        infoWindow: InfoWindow(
+          title: 'Dustbin',
+          snippet: binState == 'empty' ? 'Empty' : 'Full',
+        ),
+        icon: binState == 'empty' ? greenIcon : redIcon,
+        anchor: Offset(0.5, 0.5),
+      );
+    } else {
+      setState(() {
+        markers.remove(MarkerId(change.document.documentID));
+      });
+    }
   }
 
   truckMarkerChanger(DocumentChange change) {
-    truckState = change.document['state'];
-    markerId = MarkerId(change.document.documentID);
-    markers[markerId] = Marker(
-      // This marker id can be anything that uniquely identifies each marker.
-      markerId: markerId,
-      position: LatLng(double.parse(change.document['latitude']),
-          double.parse(change.document['longitude'])),
-      infoWindow: InfoWindow(
-        title: 'Truck',
-        snippet: truckState == 'full' ? 'This truck is full.' : 'Collecting garbage.',
-      ),
-      icon: truckIcon,
-      anchor: Offset(0.5, 0.5),
-    );
+    if (change.type.toString() != 'DocumentChangeType.removed') {
+      truckState = change.document['state'];
+      markerId = MarkerId(change.document.documentID);
+      markers[markerId] = Marker(
+        // This marker id can be anything that uniquely identifies each marker.
+        markerId: markerId,
+        position:
+            LatLng(change.document['latitude'], change.document['longitude']),
+        infoWindow: InfoWindow(
+          title: 'Truck',
+          snippet: truckState == 'full'
+              ? 'This truck is full'
+              : 'Collecting garbage',
+        ),
+        icon: truckIcon,
+        anchor: Offset(0.5, 0.5),
+      );
+    } else {
+      setState(() {
+        markers.remove(MarkerId(change.document.documentID));
+      });
+    }
   }
 
   @override

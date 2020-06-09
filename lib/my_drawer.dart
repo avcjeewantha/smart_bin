@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:smart_bin/authservices.dart';
 
+import 'driver_map.dart';
+
 class MyDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -21,11 +23,10 @@ class MyDrawer extends StatelessWidget {
             ListTile(
               title: Text('Truck Map'),
               onTap: () {
-
                 AuthService().getCurrentUser().then((user) {
                   if (user != null) {
                     Navigator.pop(context);
-                    Navigator.pushNamed(context, "/driver_map");
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => DriverMap()));
                   } else {
                     Navigator.pop(context);
                     Navigator.pushNamed(context, "/login");
