@@ -2,6 +2,7 @@ const admin = require('firebase-admin');
 let http = require('http');
 
 let serviceAccount = require('./smart-bin-273112-6339b0df47cc.json');
+let locationJson = JSON.parse(JSON.stringify(require("./location.json")));
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
@@ -22,7 +23,9 @@ module.exports = {
             let docRef = db.collection('Bin').doc(binId);
 
             let setAda = docRef.set({
-                status: binStatus;
+                longitude: locationJson[binId]["longitude"],
+                latitude: locationJson[binId]["latitude"],
+                status: binStatus
             });
             console.info("Bin status: "+binStatus+" saved successfully for bin id: "+binId+"...");
             successCallback("Bin status: "+binStatus+" saved successfully for bin id: "+binId+"...");
