@@ -8,7 +8,6 @@ import 'package:google_map_polyline/google_map_polyline.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:smart_bin/authservices.dart';
-import 'package:smart_bin/my_drawer.dart';
 import 'package:smart_bin/utils/flushbar.dart';
 import 'package:smart_bin/utils/widgets.dart';
 
@@ -150,14 +149,14 @@ class _DriverMap extends State<DriverMap> {
 
     _locationTracker.onLocationChanged.listen((LocationData cLoc) {
       if (navigation == true) {
-         setPolylines();
+        setPolylines();
       } else {
         polylineCoordinates.clear();
       }
       locationUpdater(cLoc);
     });
     polylineCoordinates.clear();
-    isRideStarted =false;
+    isRideStarted = false;
   }
 
   void locationUpdater(LocationData currentLocationData) {
@@ -210,24 +209,31 @@ class _DriverMap extends State<DriverMap> {
     );
   }
 
+
   truckMarkerChanger(DocumentChange change) {
-    if (change.document.documentID != currentUser.uid) {
-      truckState = change.document['state'];
-      markerId = MarkerId(change.document.documentID);
-      markers[markerId] = Marker(
-        // This marker id can be anything that uniquely identifies each marker.
-        markerId: markerId,
-        position:
-            LatLng(change.document['latitude'], change.document['longitude']),
-        infoWindow: InfoWindow(
-          title: 'Truck',
-          snippet: truckState == 'full'
-              ? 'This truck is full.'
-              : 'Collecting garbage.',
-        ),
-        icon: truckIcon,
-        anchor: Offset(0.5, 0.5),
-      );
+    if (change.type.toString() != 'DocumentChangeType.removed') {
+      if (change.document.documentID != currentUser.uid) {
+        truckState = change.document['state'];
+        markerId = MarkerId(change.document.documentID);
+        markers[markerId] = Marker(
+          // This marker id can be anything that uniquely identifies each marker.
+          markerId: markerId,
+          position:
+              LatLng(change.document['latitude'], change.document['longitude']),
+          infoWindow: InfoWindow(
+            title: 'Truck',
+            snippet: truckState == 'full'
+                ? 'This truck is full'
+                : 'Collecting garbage',
+          ),
+          icon: truckIcon,
+          anchor: Offset(0.5, 0.5),
+        );
+      }
+    } else {
+      setState(() {
+        markers.remove(MarkerId(change.document.documentID));
+      });
     }
   }
 
@@ -268,11 +274,6 @@ class _DriverMap extends State<DriverMap> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
-                      IconButton(
-                          icon: Icon(Icons.menu),
-                          onPressed: () {
-                            _scaffoldKey.currentState.openDrawer();
-                          }),
                       RaisedButton(
                         textColor: Colors.orange,
                         disabledTextColor: Colors.orange,
@@ -332,7 +333,6 @@ class _DriverMap extends State<DriverMap> {
                       ),
                     ]),
               ),
-        drawer: MyDrawer(),
       ),
     );
   }
