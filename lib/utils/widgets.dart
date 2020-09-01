@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../data_models/countries.dart';
+import 'dart:async';
 
 class PhoneAuthWidgets {
   static Widget searchCountry(TextEditingController controller) => Padding(
@@ -97,7 +98,7 @@ class PhoneAuthWidgets {
           style: TextStyle(color: Colors.black, fontSize: 14.0)));
 
   static Future<Widget> dialogBox(
-          BuildContext context, Function setPolylines) async =>
+          BuildContext context,Function choiceIndicator) async =>
       await showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -112,6 +113,7 @@ class PhoneAuthWidgets {
                       children: [
                         new FlatButton(
                           onPressed: () {
+                            choiceIndicator("no");
                             Navigator.pop(context);
                           },
                           child: Text('NO'),
@@ -120,7 +122,7 @@ class PhoneAuthWidgets {
                         ),
                         new FlatButton(
                           onPressed: () {
-                            setPolylines();
+                            choiceIndicator("yes");
                             Navigator.pop(context);
                           },
                           child: Text('YES'),

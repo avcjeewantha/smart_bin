@@ -33,6 +33,7 @@ class _DriverMap extends State<DriverMap> {
   FirebaseUser currentUser;
   bool isRideStarted = false;
   LocationData currentLocation;
+  LatLng binLocation;
   String googleAPIKey = "AIzaSyDhhXJB0516oa3gdPj7UHf8DHUu4j0ysSc";
   GoogleMapPolyline googleMapPolyline;
   List<LatLng> polylineCoordinates = [];
@@ -43,6 +44,13 @@ class _DriverMap extends State<DriverMap> {
 
   static final CameraPosition initialLocation =
       CameraPosition(target: LatLng(9.6615, 80.0255), zoom: 14.4746);
+
+  void choiceIndicator(String choice) {
+    if(choice=="yes"){
+      currentDestination=binLocation;
+    }
+    setPolylines();
+  }
 
   void updateMarkerAndCircle(LocationData newLocaldata) {
     LatLng latlng = LatLng(newLocaldata.latitude, newLocaldata.longitude);
@@ -191,9 +199,10 @@ class _DriverMap extends State<DriverMap> {
         snippet: binState == 'empty' ? 'Empty' : 'Full',
       ),
       onTap: () async {
-        currentDestination = markerPosition;
+        binLocation = markerPosition;
+
         if (isRideStarted) {
-          await PhoneAuthWidgets.dialogBox(context, setPolylines);
+          await PhoneAuthWidgets.dialogBox(context,choiceIndicator);
         }
       },
       icon: binState == 'empty' ? greenIcon : redIcon,
@@ -336,7 +345,8 @@ class _DriverMap extends State<DriverMap> {
   }
 
   Future<void> setPolylines() async {
-    navigation = true;
+    if(currentLocation != null && currentDestination != null){
+      navigation = true;
     List<PointLatLng> result = await polylinePoints.getRouteBetweenCoordinates(
         googleAPIKey,
         currentLocation.latitude,
@@ -356,6 +366,7 @@ class _DriverMap extends State<DriverMap> {
             color: Color.fromARGB(255, 40, 122, 198),
             points: polylineCoordinates));
       });
+    }
     }
   }
 }
