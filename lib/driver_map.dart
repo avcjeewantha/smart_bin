@@ -87,7 +87,7 @@ class _DriverMap extends State<DriverMap> {
         if (mapController != null) {
           mapController.animateCamera(CameraUpdate.newCameraPosition(
               new CameraPosition(
-                  bearing: 192.8334901395799,
+//                  bearing: 192.8334901395799,
                   target: LatLng(newLocalData.latitude, newLocalData.longitude),
                   tilt: 0,
                   zoom: 17.00)));
