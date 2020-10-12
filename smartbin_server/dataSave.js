@@ -11,7 +11,6 @@ admin.initializeApp({
 let db = admin.firestore();
 
 /**
- * Created by Sandun Gunasekara on 06/08/20.
  * Function to save data into firebase
  * @type {{saveData: saveData}}
  */

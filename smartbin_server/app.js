@@ -10,7 +10,6 @@ app.use(function (req, res, next) {                 // Middleware for express re
 });
 
 /**
- * Created by Sandun Gunasekara on 06/08/20.
  * <p>
  * Endpoint that callabl;e to update the firebase database
  */
