@@ -26,15 +26,46 @@ app.post("/update", function (req, res) {
             let status = body["status"];
             let binId = body["id"];
 
-            console.info ("Data received ...");
-            sd.saveData(binId,status,(data)=>{
+            console.info("Data received ...");
+            sd.saveData(binId, status, (data) => {
                 res.status(200).send(data);
-            }, (error)=>{
+            }, (error) => {
                 res.status(404).send(error);
             });
 
 
             console.info("Response for /update request was sent...");
+        });
+    } catch (e) {
+        res.status(500).send(e);
+    }
+
+
+});
+
+app.post("/changelocation", function (req, res) {
+    try {
+        console.info("Received a Post request to the address \"/changelocation\"");                     // request for get boundaries for a sprint list
+        let body = [];
+        req.on('data', (chunk) => {
+            body.push(chunk);                                                                    // collect request data
+        }).on('end', () => {
+            // on end of data, perform necessary action
+            body = Buffer.concat(body).toString();                                              // concat data chunks
+            body = JSON.parse(body);
+            let latitude = body["latitude"];
+            let longitude = body["longitude"];
+            let binId = body["id"];
+
+            console.info("Data received ...");
+            sd.changeLocation(binId, latitude, longitude, (data) => {
+                res.status(200).send(data);
+            }, (error) => {
+                res.status(404).send(error);
+            });
+
+
+            console.info("Response for /changelocation request was sent...");
         });
     } catch (e) {
         res.status(500).send(e);
